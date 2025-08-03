@@ -1,0 +1,11 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Security Vulnerability (Private)
+    url: mailto:jamie.saker@macawi.ai
+    about: For critical security vulnerabilities, please use responsible disclosure
+  - name: GitHub Discussions
+    url: https://github.com/macawi-ai/Strigoi/discussions
+    about: For questions and general discussions about Strigoi
+  - name: Documentation
+    url: https://github.com/macawi-ai/Strigoi/tree/main/docs
+    about: Check our documentation for answers first
