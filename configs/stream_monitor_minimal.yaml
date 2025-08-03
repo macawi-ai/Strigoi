@@ -1,0 +1,23 @@
+# Minimal Strigoi Stream Monitor Configuration
+# Quick start configuration for testing
+
+stream:
+  mode: "tap"
+  targets:
+    auto_discover: true
+  duration: 30s
+
+linux:
+  method: "procfs"  # Works without root
+  procfs_polling: 1s
+
+security:
+  mode: "passive"
+  alerts:
+    enabled: true
+    destinations: ["console"]
+
+output:
+  live_view:
+    enabled: true
+    mode: "simple"

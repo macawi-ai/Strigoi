@@ -1,0 +1,5 @@
+# The Protocol Pipeline - Explained Simply
+
+## One Paragraph
+
+The Protocol Pipeline is our unique approach to security research that treats every discovery like a scientific experiment. When we find a vulnerability or attack pattern, it enters a five-stage pipeline: Request (what are we investigating?), Research (how does it work?), Implementation (build the defense), Testing (prove it works), and Release (deploy to community). Each stage creates immutable documentation stored in version control and our DuckDB system. This means every security insight is permanently recorded, traceable, and builds on previous knowledge - like a blockchain of security intelligence. Unlike traditional "fix and forget" security, our pipeline ensures that every attack we stop makes the entire ecosystem permanently smarter.

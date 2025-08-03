@@ -1,0 +1,61 @@
+strigoi_module:
+  identity:
+    id: MOD-2025-00001
+    name: "Sudo Cache Tailgating Detector"
+    version: "1.0.0"
+    type: "scanner"
+    
+  classification:
+    risk_level: "low"
+    white_hat_permitted: true
+    ethical_constraints:
+      - "For security auditing and defensive purposes only"
+      - "Must not be used for unauthorized privilege escalation"
+      - "Results should be reported to system administrators"
+      
+  specification:
+    targets:
+      - "linux"
+      - "macos"
+    capabilities:
+      - "Detects active sudo cache sessions"
+      - "Monitors for potential tailgating opportunities"
+      - "Alerts on privilege escalation risks"
+    prerequisites:
+      - "Requires read access to process information"
+      - "Works best with elevated privileges for full system scan"
+      
+  provenance:
+    pipeline_run_id: "PIPE-2025-001"
+    source_repository: "https://github.com/macawi-ai/strigoi"
+    pipeline_stages:
+      request:
+        document: "REQ-2025-001-sudo-tailgate.md"
+        commit: "abc123def456"
+        timestamp: "2025-01-26T10:00:00Z"
+      research:
+        document: "RES-2025-001-sudo-cache-analysis.md"
+        commit: "def456ghi789"
+        timestamp: "2025-01-26T11:00:00Z"
+      implementation:
+        document: "IMPL-2025-001-detector-module.md"
+        commit: "ghi789jkl012"
+        timestamp: "2025-01-26T12:00:00Z"
+      testing:
+        document: "TEST-2025-001-validation.md"
+        commit: "jkl012mno345"
+        timestamp: "2025-01-26T13:00:00Z"
+      release:
+        document: "REL-2025-001-v1.0.0.md"
+        commit: "mno345pqr678"
+        timestamp: "2025-01-26T14:00:00Z"
+        
+  distribution:
+    channel: "official"
+    uri: "https://github.com/macawi-ai/strigoi-modules/releases/download/v1.0.0/sudo-tailgate-1.0.0.tar.gz"
+    verification:
+      method: "sha256"
+      hash: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      size_bytes: 45678
+    dependencies:
+      - "strigoi-core>=2.0.0"

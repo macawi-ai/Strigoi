@@ -1,0 +1,130 @@
+# Feature Metacode: tools/call
+# HIGH RISK: Arbitrary function execution capability
+
+feature:
+  id: mcp_tools_call
+  white_hat_permitted: LIMITED  # Only with explicit constraints
+
+operation:
+  action: SEND_REQUEST
+  protocol: JSON_RPC_2.0
+  method: "tools/call"
+  
+  parameters:
+    required:
+      - name: name
+        type: STRING
+        purpose: TOOL_IDENTIFIER
+      - name: arguments
+        type: OBJECT
+        purpose: ARBITRARY_PARAMS
+
+constraints:
+  rate_limit:
+    max: 1  # Extremely restrictive
+    window: MINUTE
+  timeout: 2_SECONDS
+  retry: FORBIDDEN
+  
+  execution_sandbox:
+    - NO_SYSTEM_CALLS
+    - NO_NETWORK_ACCESS
+    - NO_FILE_WRITES
+    - MEMORY_LIMIT: 10MB
+
+validation_rules:
+  
+  - rule: BLOCKLIST_DANGEROUS_TOOLS
+    check:
+      field: request.params.name
+      must_not_match:
+        - "exec*"
+        - "system*"
+        - "eval*"
+        - "compile*"
+        - "__*"
+    severity: ABORT_TEST
+    
+  - rule: DETECT_INJECTION_IN_ARGS
+    check:
+      field: request.params.arguments
+      recursive_scan_for:
+        - shell_metacharacters: [";", "|", "&", "$", "`"]
+        - path_traversal: ["../", "..\\"]
+        - script_tags: ["<script", "javascript:"]
+    severity: SECURITY_FINDING
+    
+  - rule: RESPONSE_TIME_ANOMALY
+    check:
+      metric: response_time
+      abnormal_if:
+        - greater_than: 10_SECONDS  # Possible DoS
+        - variance_spike: 500%      # Timing attack
+    
+  - rule: ERROR_INFORMATION_LEAK
+    check:
+      field: response.error.message
+      must_not_contain:
+        - file_paths
+        - stack_traces
+        - internal_ips
+        - credentials
+
+behavior_constraints:
+  
+  - constraint: TEST_ONLY_SAFE_TOOLS
+    whitelist:
+      - "echo"
+      - "ping" 
+      - "status"
+      - "version"
+      
+  - constraint: PAYLOAD_LIMITS
+    max_argument_size: 1KB
+    max_nesting_depth: 3
+    
+  - constraint: ABORT_ON_ANOMALY
+    triggers:
+      - unexpected_network_activity
+      - file_system_access
+      - memory_spike
+      - cpu_spike
+
+test_sequence:
+  1_RECONNAISSANCE:
+    - ENUMERATE_AVAILABLE_TOOLS
+    - IDENTIFY_HIGH_RISK_TOOLS
+    - MAP_ARGUMENT_SCHEMAS
+    
+  2_SAFE_PROBE:
+    - TEST_BENIGN_TOOLS_ONLY
+    - VALIDATE_SCHEMA_ENFORCEMENT
+    - CHECK_TYPE_COERCION
+    
+  3_BOUNDARY_TEST:
+    - MISSING_REQUIRED_ARGS
+    - EXTRA_UNEXPECTED_ARGS
+    - MALFORMED_STRUCTURES
+    
+  4_SECURITY_PROBE:
+    - INJECTION_ATTEMPTS
+    - RESOURCE_EXHAUSTION
+    - ERROR_TRIGGERING
+    
+  5_ABORT_CRITERIA:
+    - IF: CRITICAL_VULN_FOUND
+      THEN: STOP_IMMEDIATELY
+    - IF: SYSTEM_COMPROMISE_RISK
+      THEN: QUARANTINE_RESULTS
+
+risk_assessment:
+  function_class: EXECUTION
+  base_risk: HIGH
+  
+  multipliers:
+    - no_input_validation: 5.0
+    - allows_system_commands: 10.0
+    - no_sandboxing: 8.0
+    - error_details_leaked: 2.0
+    
+  maximum_acceptable_risk: 40  # Abort above this

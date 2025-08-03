@@ -1,0 +1,115 @@
+# Model Context Protocol (MCP) - Updated Package
+# Version: 2024-11-05 - Update 1.0.1
+
+header:
+  protocol_identity:
+    name: "Model Context Protocol"
+    version: "2024-11-05"
+    uuid: "mcp-2024-11-05-strigoi-pkg"
+    family: "agent-context"
+  
+  strigoi_metadata:
+    package_type: "official"
+    package_version: "1.0.1"
+    last_updated: "2025-01-25T12:00:00Z"
+    compatibility: "strigoi-0.1.0+"
+    
+  security_assessment:
+    test_coverage: 92.5  # Increased coverage
+    vulnerability_count: 15  # New vulnerabilities discovered
+    critical_findings: 4     # One more critical finding
+    last_assessment: "2025-01-25T12:00:00Z"
+
+payload:
+  
+  test_modules:
+    # All existing modules plus new ones
+    - module_id: "mcp/discovery/tools_list"
+      module_type: "discovery"
+      risk_level: "low"
+      test_vectors:
+        - vector: "enumerate_exposed_tools"
+          severity_checks:
+            - pattern: "exec|shell|command|spawn|fork"  # Added spawn|fork
+              severity: "critical"
+            - pattern: "write|delete|modify|truncate"   # Added truncate
+              severity: "high"
+            - pattern: "read|list|query|scan"           # Added scan
+              severity: "medium"
+    
+    # NEW MODULE: Context manipulation
+    - module_id: "mcp/attack/context_manipulation"
+      module_type: "attack"
+      risk_level: "critical"
+      status: "active"
+      test_vectors:
+        - vector: "context_overflow"
+          description: "Overflow context window to hide malicious prompts"
+          parameters:
+            payload_size: 100000
+            overflow_technique: "token_stuffing"
+        - vector: "context_poisoning"
+          description: "Insert malicious context that persists"
+          parameters:
+            poison_location: "system_prompt"
+            persistence_check: true
+    
+    # NEW MODULE: Tool confusion attack
+    - module_id: "mcp/attack/tool_confusion"
+      module_type: "attack"
+      risk_level: "high"
+      status: "active"
+      test_vectors:
+        - vector: "ambiguous_tool_names"
+          description: "Exploit similarly named tools"
+        - vector: "tool_parameter_injection"
+          description: "Inject parameters into tool calls"
+  
+  protocol_intelligence:
+    
+    # New vulnerability discovered
+    common_vulnerabilities:
+      - cve: "STRIGOI-MCP-004"
+        description: "Context window manipulation allows prompt hiding"
+        affected_versions: "all"
+        severity: "critical"
+      
+      - cve: "STRIGOI-MCP-005"
+        description: "Tool name collision enables privilege escalation"
+        affected_versions: "2024-11-05"
+        severity: "high"
+    
+    # New attack chain
+    attack_chains:
+      - chain_id: "mcp_context_takeover"
+        name: "Context Window Manipulation Attack"
+        steps:
+          - "Enumerate context window size"
+          - "Overflow with benign content"
+          - "Hide malicious prompt at boundary"
+          - "Execute privileged tool access"
+        complexity: "high"
+        impact: "critical"
+
+  update_configuration:
+    update_source: "http://localhost:8888/protocols/mcp"
+    update_frequency: "daily"  # Increased frequency
+    signature_verification: true
+    rollback_supported: true
+    
+    scheduled_updates:
+      - date: "2025-01-26T00:00:00Z"
+        changes:
+          - "Additional tool confusion patterns"
+          - "Memory exhaustion test vectors"
+          - "Cross-protocol attack chains"
+
+distribution:
+  channels:
+    - "official"
+    - "strigoi-core"
+    - "urgent-security"  # New channel for critical updates
+  
+  verification:
+    checksum: "sha256:fedcba987654..."
+    signature: "gpg:strigoi-signing-key"

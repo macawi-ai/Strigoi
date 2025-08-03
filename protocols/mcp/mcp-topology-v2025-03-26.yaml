@@ -1,0 +1,289 @@
+# Model Context Protocol - Complete Topology Map
+# Generated: 2025-07-24
+# Purpose: 100% feature mapping for security analysis
+
+protocol:
+  metadata:
+    name: Model Context Protocol (MCP)
+    version: 2025-03-26
+    previous_versions:
+      - 2024-11-05  # Initial release
+    status: active
+    owner: Anthropic
+    adopters:
+      - OpenAI (March 2025)
+      - Block
+      - Apollo
+    repository: github.com/modelcontextprotocol/specification
+    documentation: modelcontextprotocol.io
+    schema_format: JSON Schema Draft-07
+    license: (TODO - check repository)
+    
+  architecture:
+    protocol_type: JSON-RPC 2.0
+    transport: 
+      - stdio
+      - HTTP (future)
+    roles:
+      - host (Claude Desktop, IDEs)
+      - client (application)
+      - server (data/tool provider)
+      
+  capabilities:
+    # Complete feature switches - what can be on/off
+    
+    tools:
+      description: "Server can expose executable functions"
+      operations:
+        list:
+          method: tools/list
+          direction: client_to_server
+          paginated: yes
+          required_params: []
+          optional_params: [cursor]
+          
+        call:
+          method: tools/call
+          direction: client_to_server
+          required_params: [name]
+          optional_params: [arguments]
+          risk_level: HIGH  # Can execute arbitrary functions
+          
+      notifications:
+        changed:
+          method: tools/list_changed
+          direction: server_to_client
+          
+    resources:
+      description: "Server can expose data/content"
+      operations:
+        list:
+          method: resources/list
+          direction: client_to_server
+          paginated: yes
+          
+        read:
+          method: resources/read
+          direction: client_to_server
+          required_params: [uri]
+          risk_level: MEDIUM  # Can access files/data
+          
+        subscribe:
+          method: resources/subscribe
+          direction: client_to_server
+          required_params: [uri]
+          
+        unsubscribe:
+          method: resources/unsubscribe
+          direction: client_to_server
+          required_params: [uri]
+          
+      notifications:
+        updated:
+          method: resources/updated
+          direction: server_to_client
+          
+        list_changed:
+          method: resources/list_changed
+          direction: server_to_client
+          
+    prompts:
+      description: "Server can provide prompt templates"
+      operations:
+        list:
+          method: prompts/list
+          direction: client_to_server
+          paginated: yes
+          
+        get:
+          method: prompts/get
+          direction: client_to_server
+          required_params: [name]
+          optional_params: [arguments]
+          risk_level: MEDIUM  # Can inject instructions
+          
+      notifications:
+        list_changed:
+          method: prompts/list_changed
+          direction: server_to_client
+          
+    roots:
+      description: "Client can advertise filesystem roots"
+      operations:
+        list:
+          method: roots/list
+          direction: server_to_client
+          
+      notifications:
+        list_changed:
+          method: roots/list_changed
+          direction: client_to_server
+          
+    sampling:
+      description: "Server can request LLM sampling"
+      operations:
+        create_message:
+          method: sampling/createMessage
+          direction: server_to_client
+          required_params: [messages, maxTokens]
+          risk_level: HIGH  # Can generate arbitrary content
+          
+    completion:
+      description: "Client can request completions"
+      operations:
+        complete:
+          method: completion/complete
+          direction: client_to_server
+          required_params: [resourceUri, document]
+          
+    logging:
+      description: "Bidirectional logging"
+      operations:
+        message:
+          method: logging/message
+          direction: bidirectional
+          levels: [debug, info, notice, warning, error, critical, alert, emergency]
+          
+        set_level:
+          method: logging/set_level
+          direction: client_to_server
+          required_params: [level]
+          
+  message_types:
+    # Complete inventory of every message type
+    
+    initialization:
+      initialize:
+        direction: client_to_server
+        required: yes  # Must be first message
+        params:
+          required: [protocolVersion, clientInfo]
+          optional: [capabilities]
+          
+      initialized:
+        direction: server_to_client
+        sent_after: initialize_response
+        
+    lifecycle:
+      ping:
+        direction: bidirectional
+        purpose: keepalive
+        
+      progress:
+        direction: bidirectional
+        purpose: long_running_operations
+        params: [progressToken, progress, total]
+        
+      cancelled:
+        direction: bidirectional
+        purpose: operation_cancellation
+        
+  data_structures:
+    # Every data type with complete field mapping
+    
+    Tool:
+      fields:
+        name:
+          type: string
+          required: yes
+          constraints: unique_per_server
+          
+        description:
+          type: string
+          required: no
+          purpose: LLM_hint
+          
+        inputSchema:
+          type: object
+          required: yes
+          format: JSON_Schema
+          constraints:
+            type: must_be_object
+            
+        annotations:
+          type: object
+          required: no
+          fields:
+            audience:
+              type: array[Role]
+              values: [user, assistant]
+            priority:
+              type: number
+              range: 0-1
+              
+    Resource:
+      fields:
+        uri:
+          type: string
+          required: yes
+          format: URI
+          
+        name:
+          type: string
+          required: yes
+          
+        description:
+          type: string
+          required: no
+          
+        mimeType:
+          type: string
+          required: no
+          
+        annotations:
+          type: object
+          required: no
+          
+    Prompt:
+      fields:
+        name:
+          type: string
+          required: yes
+          
+        description:
+          type: string
+          required: no
+          
+        arguments:
+          type: array[PromptArgument]
+          required: no
+          
+    # ... continuing with all 70+ data types
+    
+  security_considerations:
+    authentication:
+      built_in: NO  # Major risk factor
+      recommendation: "Implement at transport layer"
+      
+    authorization:
+      built_in: NO  # Server trusts all clients
+      recommendation: "Implement permission system"
+      
+    rate_limiting:
+      built_in: NO
+      recommendation: "Critical for DoS prevention"
+      
+    input_validation:
+      built_in: PARTIAL  # JSON Schema for tools
+      gaps:
+        - "No validation for resource URIs"
+        - "No size limits specified"
+        - "No timeout specifications"
+        
+  risk_indicators:
+    high_risk_features:
+      - tools/call  # Arbitrary code execution
+      - sampling/createMessage  # Content generation
+      - resources/read  # Data access
+      
+    missing_security:
+      - authentication
+      - authorization  
+      - rate_limiting
+      - audit_logging
+      
+    trust_model: "Full trust between client/server"
+    
+# TODO: Complete extraction of all 70+ data types
+# TODO: Map all error codes
+# TODO: Document all state transitions

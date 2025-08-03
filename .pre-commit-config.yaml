@@ -1,0 +1,76 @@
+# Pre-commit hooks for Strigoi
+# Install: pre-commit install
+# Run manually: pre-commit run --all-files
+
+repos:
+  # Go formatting
+  - repo: https://github.com/dnephin/pre-commit-golang
+    rev: v0.5.1
+    hooks:
+      - id: go-fmt
+      - id: go-vet
+      - id: go-imports
+      - id: go-cyclo
+        args: [-over=15]
+      - id: go-mod-tidy
+      - id: go-unit-tests
+      - id: golangci-lint
+
+  # Security scanning
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.4.0
+    hooks:
+      - id: detect-secrets
+        args: ['--baseline', '.secrets.baseline']
+
+  # General file checks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-added-large-files
+        args: ['--maxkb=500']
+      - id: check-case-conflict
+      - id: check-merge-conflict
+      - id: check-executables-have-shebangs
+      - id: check-json
+      - id: pretty-format-json
+        args: ['--autofix']
+
+  # Markdown
+  - repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: v0.37.0
+    hooks:
+      - id: markdownlint
+        args: ['--fix']
+
+  # YAML
+  - repo: https://github.com/adrienverge/yamllint
+    rev: v1.33.0
+    hooks:
+      - id: yamllint
+        args: ['-c=.yamllint.yaml']
+
+  # Go security
+  - repo: https://github.com/securego/gosec
+    rev: v2.18.2
+    hooks:
+      - id: gosec
+
+# Local hooks
+  - repo: local
+    hooks:
+      - id: go-no-replacement
+        name: Check for go.mod replacements
+        entry: ./scripts/check-go-mod-replacements.sh
+        language: script
+        files: go.mod
+      
+      - id: check-binary-size
+        name: Check binary size
+        entry: ./scripts/check-binary-size.sh
+        language: script
+        pass_filenames: false
+        always_run: true

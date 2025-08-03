@@ -1,0 +1,32 @@
+# Strigoi Marketplace Catalog
+# This file represents what would be hosted at
+# https://github.com/macawi-ai/marketplace/blob/main/catalog.yaml
+
+marketplace:
+  version: "1.0.0"
+  updated: "2025-01-26T14:00:00Z"
+  
+modules:
+  official:
+    - id: "mcp/sudo-tailgate"
+      name: "Sudo Cache Tailgating Detector"
+      latest_version: "1.0.0"
+      description: "Detects and monitors sudo cache sessions for security auditing"
+      risk_level: "low"
+      manifest_url: "https://raw.githubusercontent.com/macawi-ai/marketplace/main/modules/official/mcp/sudo-tailgate/v1.0.0.yaml"
+      
+    - id: "network/port-scanner"
+      name: "Basic Port Scanner"
+      latest_version: "0.9.0"
+      description: "Simple TCP port scanner for network discovery"
+      risk_level: "medium"
+      manifest_url: "https://raw.githubusercontent.com/macawi-ai/marketplace/main/modules/official/network/port-scanner/v0.9.0.yaml"
+      
+  community:
+    - id: "johnsmith/custom-fuzzer"
+      name: "Custom Web Fuzzer"
+      latest_version: "2.1.0"
+      description: "Web application fuzzing tool"
+      risk_level: "high"
+      manifest_url: "https://raw.githubusercontent.com/macawi-ai/marketplace/main/modules/community/johnsmith/custom-fuzzer/v2.1.0.yaml"
+      warning: "Community module - use at your own risk"

@@ -1,0 +1,52 @@
+=== STRIGOI TEST REPORT ===
+Protocol: mcp v2025-03-26
+Target: http://localhost:8080
+Date: 2025-07-25T01:52:45Z
+Strigoi: v1.0.0-beta.1 (build a7f3e9b2)
+Signed: sha256:3f19999b07380324e2671080061c2406bd91042e8b5da6c401b1974c80fdbf36
+===========================
+
+tools/list:rate_limit_enforcement:PASS:Prevent reconnaissance amplification
+tools/list:internal_exposure_check:FAIL:Exposes admin_debug_console tool
+tools/list:pagination_consistency:PASS:Ensure predictable enumeration behavior
+tools/list:response_time_analysis:PASS:Detect timing attacks on enumeration
+tools/list:schema_validation:PASS:Ensure protocol compliance
+
+=== COVERAGE TOTALITY ===
+Discovered: 23
+Tested: 1 (4%)
+Not Tested: 22 (95%)
+
+NOT TESTED:
+tools/call:SKIPPED:WHITE_HAT_RESTRICTED
+prompts/list:SKIPPED:NOT_EXECUTED
+prompts/run:SKIPPED:WHITE_HAT_RESTRICTED
+prompts/get:SKIPPED:NOT_IMPLEMENTED
+resources/list:SKIPPED:NOT_EXECUTED
+resources/read:SKIPPED:NOT_EXECUTED
+resources/write:SKIPPED:WHITE_HAT_RESTRICTED
+resources/delete:SKIPPED:WHITE_HAT_RESTRICTED
+resources/update:SKIPPED:WHITE_HAT_RESTRICTED
+resources/subscribe:SKIPPED:NOT_IMPLEMENTED
+completion/create:SKIPPED:WHITE_HAT_RESTRICTED
+completion/cancel:SKIPPED:WHITE_HAT_RESTRICTED
+logging/list:SKIPPED:AUTHENTICATION_REQUIRED
+logging/get:SKIPPED:AUTHENTICATION_REQUIRED
+logging/set:SKIPPED:AUTHENTICATION_REQUIRED
+server/info:SKIPPED:NOT_EXECUTED
+server/configure:SKIPPED:AUTHENTICATION_REQUIRED
+auth/setup:SKIPPED:AUTHENTICATION_REQUIRED
+auth/validate:SKIPPED:AUTHENTICATION_REQUIRED
+progress/report:SKIPPED:NOT_IMPLEMENTED
+progress/cancel:SKIPPED:NOT_IMPLEMENTED
+sampling/start:SKIPPED:WHITE_HAT_RESTRICTED
+
+=== RISK SUMMARY ===
+Critical Findings: 1
+High Risk: 0
+0
+Medium Risk: 0
+0
+Low Risk: 0
+0
+

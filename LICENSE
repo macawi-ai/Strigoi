@@ -1,0 +1,104 @@
+STRIGOI SECURITY VALIDATION TOOL LICENSE
+Version 1.0, January 2025
+
+Copyright © 2025 James (Jamie) R. Saker Jr., Macawi
+All Rights Reserved.
+
+IMPORTANT: READ CAREFULLY BEFORE USING THIS SOFTWARE
+
+1. DEFINITIONS
+   "Software" means the Strigoi security validation tool and all associated
+   documentation, scripts, and materials.
+   
+   "You" means the individual or legal entity exercising permissions granted
+   by this License.
+   
+   "Authorized Use" means use of the Software exclusively for legitimate
+   security testing with explicit written authorization from system owners.
+
+2. GRANT OF LICENSE
+   Subject to the terms of this License, Macawi grants You a limited,
+   non-exclusive, non-transferable, revocable license to use the Software
+   solely for Authorized Use.
+
+3. RESTRICTIONS
+   You may NOT:
+   a) Modify, adapt, or create derivative works of the Software
+   b) Reverse engineer, decompile, or disassemble the Software
+   c) Remove or alter any proprietary notices or labels
+   d) Redistribute, sublicense, rent, lease, or lend the Software
+   e) Use the Software for any unlawful purpose
+   f) Use the Software without explicit written authorization from system owners
+   g) Use the Software in any way that violates the Macawi Security Tools
+      Ethics Standard (https://github.com/macawi/strigoi/blob/main/ETHICS_STANDARD.md)
+
+4. ATTRIBUTION
+   Any use of the Software must include clear attribution:
+   "Security testing performed using Macawi Strigoi by James R. Saker Jr."
+   
+   Any public reports, presentations, or publications must include:
+   - Attribution to Macawi and James R. Saker Jr.
+   - Link to https://www.linkedin.com/in/jamessaker/
+   - Reference to this License
+
+5. NO WARRANTY
+   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+   OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+
+6. LIMITATION OF LIABILITY
+   IN NO EVENT SHALL MACAWI OR JAMES R. SAKER JR. BE LIABLE FOR ANY CLAIM,
+   DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+   OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR
+   THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+7. INDEMNIFICATION
+   You agree to indemnify, defend, and hold harmless Macawi and James R.
+   Saker Jr. from any claims, damages, or expenses arising from Your use
+   of the Software.
+
+8. TERMINATION
+   This License automatically terminates if You fail to comply with any term.
+   Upon termination, You must immediately cease all use and destroy all
+   copies of the Software.
+
+9. GOVERNING LAW
+   This License shall be governed by the laws of South Dakota, United States,
+   without regard to conflict of law principles.
+
+10. VALIDATION AND TELEMETRY
+    The Software includes a validation system that performs DNS queries to
+    validation.macawi.io for the following purposes:
+    - License compliance verification
+    - Usage analytics for product improvement
+    - Security monitoring
+    
+    This telemetry:
+    - Is fully transparent and disclosed
+    - Contains no personally identifiable information
+    - Records only timing and action data
+    - Is required for license compliance
+    
+    Removal, modification, or circumvention of this validation system:
+    - Constitutes a material breach of this License
+    - Results in immediate license termination
+    - Subjects You to legal action
+    - Automatically invokes the indemnification clause
+    
+11. ENTIRE AGREEMENT
+    This License constitutes the entire agreement between the parties and
+    supersedes all prior or contemporaneous agreements concerning the Software.
+
+12. COMMERCIAL LICENSING
+    For commercial support, custom licensing, or professional services,
+    contact: jamie.saker@macawi.ai
+
+By using the Software, You acknowledge that You have read, understood, and
+agree to be bound by the terms of this License and the Macawi Security Tools
+Ethics Standard.
+
+FOR QUESTIONS OR LICENSING INQUIRIES:
+James R. Saker Jr., CISO
+Macawi (South Dakota Corporation)
+Email: jamie.saker@macawi.ai
+LinkedIn: https://www.linkedin.com/in/jamessaker/

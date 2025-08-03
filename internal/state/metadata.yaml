@@ -1,0 +1,218 @@
+# Strigoi Assessment Metadata Template
+# Human-readable face of the First Protocol for Converged Life
+
+# Required fields for all assessments
+assessment:
+  # Core identification
+  format_version: "1.0"
+  uuid: "" # Must be UUID v4 format
+  created: "" # ISO 8601 timestamp
+  strigoi_version: "" # Semantic version (e.g., "0.3.0")
+  
+  # Human context
+  metadata:
+    title: ""
+    description: ""
+    assessor: "" # Team or individual identifier
+    classification: "" # public, internal, confidential, restricted
+    
+    # Ethical governance - always visible and required
+    ethics:
+      consent_obtained: false # Must be explicitly set to true
+      white_hat_only: true    # Always true for Strigoi
+      target_authorized: false # Must be explicitly authorized
+      data_retention_days: 90  # Default retention period
+      purpose: "" # Clear statement of assessment purpose
+      
+    # Privacy controls - user configurable
+    privacy:
+      learning_opt_in: false # Allow data for improving actors
+      anonymization_level: "medium" # none, low, medium, high
+      differential_privacy: true # Apply DP to shared data
+      tokenization_enabled: true # Replace sensitive data with tokens
+      
+  # Assessment environment context
+  environment:
+    target_description: ""
+    target_type: "" # llm_api, web_app, network, etc.
+    constraints: [] # List of operational constraints
+    scope: [] # List of assessment areas
+    authorized_by: "" # Who authorized this assessment
+    
+  # Event sourcing manifest - links to binary data
+  events:
+    total_events: 0
+    event_store_path: "events/" # Relative path to binary events
+    schema_version: "1.0" # Protocol buffer schema version
+    compression: "gzip" # Compression method used
+    
+  # Binary data manifest
+  binary_data:
+    format: "protobuf" # Serialization format
+    encryption: null # null, aes-256-gcm, etc.
+    encryption_key_id: null # Key ID if encrypted
+    files:
+      events: "events/*.pb.gz"
+      findings: "findings.pb.gz" 
+      actor_network: "network.pb.gz"
+      snapshots: "snapshots/*.pb.gz"
+      
+  # Quick human-readable summary
+  summary:
+    status: "running" # running, completed, failed, cancelled
+    duration: null # Human readable duration when complete
+    start_time: "" # ISO 8601 start timestamp
+    end_time: null # ISO 8601 end timestamp when complete
+    
+    # Actor execution summary
+    actors_executed: 0
+    unique_actors: 0
+    actor_chains: 0
+    
+    # Findings summary (updated as assessment progresses)
+    findings:
+      total: 0
+      critical: 0
+      high: 0 
+      medium: 0
+      low: 0
+      info: 0
+      
+  # Replay configuration
+  replay:
+    can_replay: true
+    requires_auth: false # Whether replay needs authorization
+    estimated_duration: null # Expected replay time
+    dependencies: [] # Required Strigoi version, actors, etc.
+    replay_notes: "" # Human guidance for replay
+    
+  # Actor Network Graph (human-readable summary)
+  # Full graph is in binary data
+  actor_network:
+    # List of actors that participated
+    actors: []
+    
+    # Key relationships (high-level overview)
+    key_chains: []
+    
+    # Network statistics
+    total_nodes: 0
+    total_edges: 0
+    max_depth: 0 # Longest chain
+    parallel_branches: 0
+    
+  # Multi-LLM collaboration summary
+  multi_llm:
+    # Models that participated in this assessment
+    models_involved: []
+    
+    # Areas where multiple models provided input
+    collaboration_areas: []
+    
+    # Summary of consensus/disagreement
+    consensus_summary: []
+    
+  # Cryptographic integrity
+  signatures:
+    metadata_hash: "" # SHA-256 of this metadata
+    events_merkle_root: "" # Merkle root of all events
+    findings_hash: "" # SHA-256 of findings
+    
+    # Digital signatures (when required)
+    assessor_signature: null
+    witness_signatures: []
+    
+  # Compliance and audit trail
+  compliance:
+    frameworks: [] # NIST, ISO 27001, etc.
+    regulations: [] # GDPR, CCPA, etc.
+    audit_trail_id: null # External audit system reference
+    
+  # Extension points for custom metadata
+  custom: {}
+
+# Schema validation rules (JSON Schema format)
+$schema: "https://json-schema.org/draft/2020-12/schema"
+type: "object"
+required:
+  - "assessment"
+  
+properties:
+  assessment:
+    type: "object"
+    required:
+      - "format_version"
+      - "uuid" 
+      - "created"
+      - "strigoi_version"
+      - "metadata"
+    
+    properties:
+      format_version:
+        type: "string"
+        pattern: "^\\d+\\.\\d+$"
+        
+      uuid:
+        type: "string"
+        pattern: "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+        
+      created:
+        type: "string"
+        format: "date-time"
+        
+      strigoi_version:
+        type: "string"
+        pattern: "^\\d+\\.\\d+\\.\\d+(-[a-zA-Z0-9-]+)?$"
+        
+      metadata:
+        type: "object"
+        required:
+          - "title"
+          - "assessor"
+          - "classification"
+          - "ethics"
+          
+        properties:
+          classification:
+            type: "string"
+            enum: ["public", "internal", "confidential", "restricted"]
+            
+          ethics:
+            type: "object"
+            required:
+              - "consent_obtained"
+              - "white_hat_only"
+              - "target_authorized"
+              - "purpose"
+            
+            properties:
+              consent_obtained:
+                type: "boolean"
+                const: true # Must be true
+                
+              white_hat_only:
+                type: "boolean"
+                const: true # Always true for Strigoi
+                
+              target_authorized:
+                type: "boolean"
+                const: true # Must be true
+                
+              data_retention_days:
+                type: "integer"
+                minimum: 1
+                maximum: 2555 # ~7 years max
+                
+          privacy:
+            type: "object"
+            properties:
+              anonymization_level:
+                type: "string"
+                enum: ["none", "low", "medium", "high"]
+                
+      summary:
+        type: "object"
+        properties:
+          status:
+            type: "string"
+            enum: ["running", "completed", "failed", "cancelled"]

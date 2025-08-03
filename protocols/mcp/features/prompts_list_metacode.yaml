@@ -1,0 +1,104 @@
+# Feature Metacode: prompts/list
+
+feature:
+  id: mcp_prompts_list
+  white_hat_permitted: YES
+
+operation:
+  action: SEND_REQUEST
+  protocol: JSON_RPC_2.0
+  method: "prompts/list"
+  
+  parameters:
+    optional:
+      - name: cursor
+        type: STRING
+        purpose: PAGINATION
+
+constraints:
+  rate_limit:
+    max: 5  # Lower than tools - more sensitive
+    window: MINUTE
+  timeout: 5_SECONDS
+  retry: FORBIDDEN
+
+validation_rules:
+  
+  - rule: MUST_BE_VALID_JSONRPC
+    check:
+      field: response.jsonrpc
+      equals: "2.0"
+      
+  - rule: MUST_CONTAIN_PROMPTS_ARRAY
+    check:
+      field: response.result.prompts
+      type: ARRAY
+      
+  - rule: EACH_PROMPT_MUST_HAVE_NAME
+    foreach: response.result.prompts
+    check:
+      required_fields:
+        - name: STRING
+        
+  - rule: DETECT_INJECTION_PATTERNS
+    foreach: response.result.prompts
+    check:
+      field: description
+      must_not_contain:
+        - "'; DROP TABLE"
+        - "sudo "
+        - "rm -rf"
+        - "<script>"
+        - "../../"
+    severity: SECURITY_FINDING
+    
+  - rule: DETECT_CREDENTIAL_REQUESTS
+    foreach: response.result.prompts
+    check:
+      field: description
+      must_not_contain:
+        - "password"
+        - "api_key"
+        - "secret"
+        - "token"
+    severity: SECURITY_FINDING
+    
+  - rule: PROMPT_LENGTH_REASONABLE
+    foreach: response.result.prompts
+    check:
+      field: description
+      max_length: 10000  # Huge prompts suspicious
+
+behavior_constraints:
+  
+  - constraint: ENUMERATION_ONLY
+    forbidden_actions:
+      - EXECUTE_PROMPTS
+      - MODIFY_PROMPTS
+      - COMBINE_PROMPTS
+      
+  - constraint: CONTENT_SANITIZATION
+    required_actions:
+      - TRUNCATE_LONG_CONTENT
+      - ESCAPE_SPECIAL_CHARS
+      - LOG_SUSPICIOUS_PATTERNS
+
+test_sequence:
+  1_PREPARE:
+    - GENERATE_REQUEST_ID
+    - CHECK_RATE_LIMIT
+    
+  2_EXECUTE:
+    - BUILD_JSONRPC_REQUEST
+    - SEND_WITH_TIMEOUT
+    - CAPTURE_RESPONSE
+    
+  3_VALIDATE:
+    - APPLY_ALL_RULES
+    - SCAN_FOR_PATTERNS
+    - RECORD_FINDINGS
+    
+  4_REPORT:
+    - SUMMARY: PASS | FAIL | SECURITY_FINDINGS
+    - HIGHLIGHT: SUSPICIOUS_PROMPTS
+    - EVIDENCE: SANITIZED_CONTENT_ONLY

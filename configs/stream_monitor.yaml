@@ -1,0 +1,202 @@
+# Strigoi Stream Monitor Configuration
+# Default configuration for STDIO stream monitoring
+
+# Stream monitoring settings
+stream:
+  # Monitoring mode
+  mode: "tap"  # tap (passive), mirror (forward), analyze (deep inspection)
+  
+  # Target configuration
+  targets:
+    auto_discover: true
+    claude_pid: 0  # 0 = auto-discover
+    mcp_pids: []   # empty = auto-discover
+    process_patterns:
+      - "claude"
+      - "mcp-server"
+      - "node.*mcp"
+      - "python.*mcp"
+      - "python3.*mcp"
+  
+  # Duration and timeouts
+  duration: 30s
+  capture_timeout: 5s
+  startup_delay: 3s  # Wait for MCP processes to spawn
+  
+  # Output settings
+  output_dir: "/var/log/strigoi/streams"
+  session_name: ""  # empty = auto-generate timestamp
+
+# Linux-specific monitoring options
+linux:
+  # Monitoring method
+  method: "hybrid"  # strace, ptrace, procfs, hybrid
+  
+  # Strace configuration
+  strace_options:
+    - "-f"                    # Follow child processes
+    - "-e"                    # Trace specific syscalls
+    - "trace=read,write,openat,close,clone,execve,pipe,dup"
+    - "-T"                    # Show time spent in syscalls
+    - "-tt"                   # Microsecond timestamps
+    - "-s"                    # String capture size
+    - "2048"                  # Capture more for JSON-RPC
+    - "-q"                    # Quiet attach/detach
+  
+  # Process monitoring via /proc
+  procfs_polling: 500ms
+  proc_paths:
+    - "/proc/*/fd/*"          # File descriptors
+    - "/proc/*/status"        # Process status
+    - "/proc/*/cmdline"       # Command line
+    - "/proc/*/environ"       # Environment (careful!)
+  
+  # File descriptor tracking
+  track_fds: [0, 1, 2]        # stdin, stdout, stderr
+  track_pipes: true           # Monitor pipe connections
+  track_sockets: true         # Monitor socket connections
+  
+  # Performance settings
+  buffer_size: 65536          # 64KB buffer
+  max_capture_size: 1048576   # 1MB max per message
+  event_queue_size: 10000     # Event buffer size
+
+# Security analysis configuration
+security:
+  # Analysis mode
+  mode: "active"              # passive, active, blocking
+  
+  # Real-time alerting
+  alerts:
+    enabled: true
+    destinations:
+      - "console"             # Display in terminal
+      - "file"                # Write to alert log
+    webhook_url: ""           # Optional webhook
+    cooldown: 30s            # Alert suppression
+    min_severity: "medium"    # info, low, medium, high, critical
+  
+  # Security patterns
+  patterns:
+    # Credential patterns
+    - name: "AWS_CREDENTIALS"
+      pattern: 'AKIA[0-9A-Z]{16}'
+      severity: "critical"
+      action: "alert"
+      
+    - name: "PRIVATE_KEY"
+      pattern: '-----BEGIN (RSA |EC |DSA |OPENSSH )?PRIVATE KEY-----'
+      severity: "critical"
+      action: "alert"
+      
+    - name: "API_KEY"
+      pattern: '(api[_-]?key|apikey|api_token)["\s]*[:=]["\s]*[a-zA-Z0-9]{16,}'
+      severity: "high"
+      action: "alert"
+      
+    # Command injection patterns
+    - name: "COMMAND_INJECTION"
+      pattern: '[;&|]|\$\(.*\)|`.*`'
+      severity: "high"
+      action: "alert"
+      
+    - name: "PATH_TRAVERSAL"
+      pattern: '\.\./|\.\.\\|%2e%2e'
+      severity: "high"
+      action: "alert"
+      
+    # Data exfiltration patterns
+    - name: "BASE64_LARGE"
+      pattern: '[A-Za-z0-9+/]{100,}={0,2}'
+      severity: "medium"
+      action: "log"
+      
+    - name: "SUSPICIOUS_URL"
+      pattern: 'https?://[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}'
+      severity: "medium"
+      action: "alert"
+  
+  # Thresholds
+  thresholds:
+    max_message_size: 10485760      # 10MB
+    max_messages_per_sec: 100       # Rate limit
+    max_data_per_minute: 104857600  # 100MB/min
+    suspicious_patterns: 5          # Before escalation
+    response_time: 30s              # Max req/resp gap
+    
+    # Process limits
+    max_child_processes: 10         # MCP server spawns
+    max_open_fds: 100              # Per process
+
+# Output configuration
+output:
+  # Live view settings
+  live_view:
+    enabled: true
+    mode: "detailed"          # simple, detailed, json
+    show_syscalls: false      # Show raw syscalls
+    show_timestamps: true     # Include timestamps
+    color_output: true        # Colorize by severity
+    
+  # Stream recording
+  recording:
+    enabled: true
+    format: "jsonl"           # json, jsonl, pcap, binary
+    compress: true            # Gzip compression
+    rotate_size: 104857600    # 100MB rotation
+    max_files: 10             # Keep last 10 files
+    
+  # Analysis reports
+  reports:
+    generate: true
+    formats:
+      - "markdown"            # Human-readable
+      - "json"                # Machine-readable
+      - "sarif"               # Security tooling
+    include_raw_data: false   # Don't include raw captures
+    
+  # Metrics export
+  metrics:
+    enabled: true
+    format: "prometheus"      # prometheus, influx
+    endpoint: ""              # Push gateway (optional)
+    interval: 10s             # Export interval
+
+# Actor-specific settings (Strigoi integration)
+actor:
+  # Actor behavior
+  chain_with: []              # Other actors to chain
+  transform_output: true      # Transform for next actor
+  
+  # Integration points
+  register_commands:
+    - "stream/tap"            # Start monitoring
+    - "stream/analyze"        # Analyze capture
+    - "stream/replay"         # Replay session
+    - "stream/patterns"       # Manage patterns
+    
+  # State management
+  persist_state: true         # Save actor state
+  state_file: "/var/lib/strigoi/stream_monitor.state"
+
+# Advanced options
+advanced:
+  # Debugging
+  debug:
+    enabled: false
+    save_raw_syscalls: false  # Save strace output
+    save_proc_snapshots: false # Periodic /proc dumps
+    verbose_logging: false    # Detailed logs
+    
+  # Performance tuning
+  performance:
+    cpu_affinity: []          # CPU cores to use
+    nice_level: 0             # Process priority
+    io_nice_level: 0          # I/O priority
+    memory_limit: ""          # cgroup memory limit
+    
+  # Experimental features
+  experimental:
+    ebpf_tracing: false       # Use eBPF instead of ptrace
+    kernel_module: false      # Load custom kernel module
+    ai_analysis: false        # Send to AI for analysis

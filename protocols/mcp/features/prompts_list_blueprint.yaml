@@ -1,0 +1,42 @@
+# Feature Blueprint: prompts/list
+# Extracted from MCP Contract v2025-03-26
+
+feature:
+  id: mcp_prompts_list
+  contract_ref: "MCP-2025-03-26#definitions.ListPromptsRequest"
+  risk_level: MEDIUM  # Higher than tools - prompts can contain instructions
+  white_hat_permitted: YES  # Still enumeration only
+  
+specification:
+  method: "prompts/list"
+  transport: "HTTP POST"
+  
+  request:
+    jsonrpc: "2.0"
+    method: "prompts/list"
+    params:
+      cursor: STRING_OPTIONAL
+    id: INTEGER_REQUIRED
+    
+  response:
+    success:
+      jsonrpc: "2.0"
+      result:
+        prompts:
+          type: ARRAY
+          items:
+            name: STRING_REQUIRED
+            description: STRING_OPTIONAL
+            arguments:
+              type: ARRAY_OPTIONAL
+              items:
+                name: STRING
+                description: STRING
+                required: BOOLEAN
+        nextCursor: STRING_OPTIONAL
+      id: INTEGER_MATCHES_REQUEST
+      
+security_considerations:
+  - "Prompts may reveal internal logic"
+  - "Could contain injection payloads"
+  - "May expose sensitive templates"

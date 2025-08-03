@@ -1,0 +1,75 @@
+# golangci-lint configuration
+run:
+  timeout: 5m
+  skip-dirs:
+    - archive
+    - archives
+    - cmd/migrate
+    - cmd/migrate-vulns
+    - cmd/registry
+    - cmd/gemini-bridge
+    - cmd/package-demo
+    - cmd/strigoi-debug
+    - demos
+    - internal/licensing
+    - internal/packages
+    - internal/ai/realtime
+    - internal/stream/filters
+    - protocols/mcp/implementation
+  skip-files:
+    - ".*\\.bak$"
+    - "test_.*"
+
+linters:
+  enable:
+    - gofmt
+    - govet
+    - gosimple
+    - ineffassign
+    - staticcheck
+    - typecheck
+    - unused
+    - gosec
+    - misspell
+    - godot
+    - goimports
+    - revive
+
+linters-settings:
+  gosec:
+    excludes:
+      - G104  # Ignore error checking for now
+  revive:
+    ignore-generated-header: true
+    severity: error
+    rules:
+      - name: blank-imports
+      - name: context-as-argument
+      - name: context-keys-type
+      - name: dot-imports
+      - name: error-return
+      - name: error-strings
+      - name: error-naming
+      - name: exported
+      - name: if-return
+      - name: increment-decrement
+      - name: var-naming
+      - name: var-declaration
+      - name: package-comments
+      - name: range
+      - name: receiver-naming
+      - name: time-naming
+      - name: unexported-return
+      - name: indent-error-flow
+      - name: errorf
+      - name: empty-block
+      - name: superfluous-else
+      - name: unused-parameter
+
+issues:
+  exclude-rules:
+    # Exclude some linters from running on tests files
+    - path: _test\.go
+      linters:
+        - gosec
+        - dupl

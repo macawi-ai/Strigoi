@@ -1,0 +1,15 @@
+# Exclude archived files from Go processing
+archive/
+archives/
+*.bak
+test_mcp_direct
+strigoi-debug
+gemini-bridge
+package-demo
+cmd/migrate
+cmd/migrate-vulns
+cmd/registry
+cmd/gemini-bridge
+cmd/package-demo
+cmd/strigoi-debug
+demos/
