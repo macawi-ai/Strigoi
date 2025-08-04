@@ -1,0 +1,267 @@
+{
+  "module": "probe/south",
+  "target": "./",
+  "timestamp": "2025-08-03T18:56:16.645170351-05:00",
+  "duration": 116274350,
+  "summary": {
+    "total_findings": 0,
+    "severity_counts": {},
+    "status": "success"
+  },
+  "results": {
+    "dependencies": [
+      {
+        "license": "",
+        "name": "github.com/chzyer/readline",
+        "repository": "",
+        "type": "direct",
+        "version": "v1.5.1"
+      },
+      {
+        "license": "",
+        "name": "github.com/fatih/color",
+        "repository": "",
+        "type": "direct",
+        "version": "v1.18.0"
+      },
+      {
+        "license": "",
+        "name": "github.com/spf13/cobra",
+        "repository": "",
+        "type": "direct",
+        "version": "v1.9.1"
+      },
+      {
+        "license": "",
+        "name": "github.com/google/uuid",
+        "repository": "",
+        "type": "direct",
+        "version": "v1.6.0"
+      },
+      {
+        "license": "",
+        "name": "github.com/inconshreveable/mousetrap",
+        "repository": "",
+        "type": "direct",
+        "version": "v1.1.0"
+      },
+      {
+        "license": "",
+        "name": "github.com/mattn/go-colorable",
+        "repository": "",
+        "type": "direct",
+        "version": "v0.1.13"
+      },
+      {
+        "license": "",
+        "name": "github.com/mattn/go-isatty",
+        "repository": "",
+        "type": "direct",
+        "version": "v0.0.20"
+      },
+      {
+        "license": "",
+        "name": "github.com/sirupsen/logrus",
+        "repository": "",
+        "type": "direct",
+        "version": "v1.9.3"
+      },
+      {
+        "license": "",
+        "name": "github.com/spf13/pflag",
+        "repository": "",
+        "type": "direct",
+        "version": "v1.0.7"
+      },
+      {
+        "license": "",
+        "name": "golang.org/x/crypto",
+        "repository": "",
+        "type": "direct",
+        "version": "v0.40.0"
+      },
+      {
+        "license": "",
+        "name": "golang.org/x/sync",
+        "repository": "",
+        "type": "direct",
+        "version": "v0.16.0"
+      },
+      {
+        "license": "",
+        "name": "golang.org/x/sys",
+        "repository": "",
+        "type": "direct",
+        "version": "v0.34.0"
+      },
+      {
+        "license": "",
+        "name": "golang.org/x/time",
+        "repository": "",
+        "type": "direct",
+        "version": "v0.12.0"
+      }
+    ],
+    "mcp_tools": [
+      {
+        "id": "c03b2f68-20af-4a9d-874c-3e0bdc55df47",
+        "name": "Claude Code MCP Configuration",
+        "type": "client",
+        "config_path": "/home/cy/.config/claude-code/mcp_servers.json",
+        "status": "configured",
+        "dependencies": [
+          {
+            "name": "neo4j-consciousness",
+            "type": "server",
+            "path": "node"
+          },
+          {
+            "name": "duckdb-analytics",
+            "type": "server",
+            "path": "python"
+          }
+        ],
+        "configuration": {
+          "mcpServers": {
+            "duckdb-analytics": {
+              "args": [
+                "-m",
+                "duckdb_mcp"
+              ],
+              "command": "python",
+              "env": {
+                "DUCKDB_PATH": "/home/synth/analytics.duckdb"
+              }
+            },
+            "neo4j-consciousness": {
+              "args": [
+                "neo4j-mcp-server.js"
+              ],
+              "command": "node",
+              "env": {
+                "API_KEY": "sk-1234567890abcdef1234567890abcdef",
+                "DATABASE_PASSWORD": "secretpassword123",
+                "NEO4J_URI": "bolt://localhost:7688"
+              }
+            }
+          }
+        },
+        "security_risks": [
+          {
+            "id": "4510452c-9ad0-4c36-929d-a009c529b6d3",
+            "rule_id": "CRED-API_KEY",
+            "name": "Credential Exposure - api_key",
+            "category": "credential_exposure",
+            "severity": "high",
+            "description": "Potential api_key found in configuration",
+            "evidence": "\"AP******************************************ef\"",
+            "file_path": "/home/cy/.config/claude-code/mcp_servers.json",
+            "line_number": 8,
+            "remediation": "Move credentials to secure environment variables or secret management system",
+            "timestamp": "2025-08-03T18:56:16.646105038-05:00"
+          }
+        ],
+        "timestamp": "2025-08-03T18:56:16.645885337-05:00",
+        "start_time": "0001-01-01T00:00:00Z",
+        "network_exposure": {}
+      },
+      {
+        "id": "2391d8e9-95e5-4499-a55b-dbde26eed54b",
+        "name": "neo4j-mcp",
+        "type": "server",
+        "version": "unknown",
+        "process_id": 2103,
+        "status": "running",
+        "timestamp": "2025-08-03T18:56:16.67804298-05:00",
+        "executable_path": "/home/cy/mcp-workspace/servers/neo4j-server/neo4j-mcp",
+        "start_time": "0001-01-01T00:00:00Z",
+        "user": "cy",
+        "command_line": "/home/cy/mcp-workspace/servers/neo4j-server/neo4j-mcp ",
+        "build_info": {
+          "mode": "-rwxr-xr-x",
+          "modified": "2025-08-02T18:07:16-05:00",
+          "size": "10123473"
+        },
+        "network_exposure": {}
+      },
+      {
+        "id": "5e21c7f9-da02-4a1d-91aa-ccf3ac74fae5",
+        "name": "duckdb-mcp",
+        "type": "server",
+        "version": "unknown",
+        "process_id": 2104,
+        "status": "running",
+        "timestamp": "2025-08-03T18:56:16.699861915-05:00",
+        "executable_path": "/home/cy/mcp-workspace/servers/duckdb-server/duckdb-mcp",
+        "start_time": "0001-01-01T00:00:00Z",
+        "user": "cy",
+        "command_line": "/home/cy/mcp-workspace/servers/duckdb-server/duckdb-mcp ",
+        "build_info": {
+          "mode": "-rwxr-xr-x",
+          "modified": "2025-08-02T19:28:14-05:00",
+          "size": "51027744"
+        },
+        "network_exposure": {}
+      },
+      {
+        "id": "78d14950-6c85-4a28-98cc-0716a2783a35",
+        "name": "chroma-mcp",
+        "type": "server",
+        "version": "unknown",
+        "process_id": 2186,
+        "status": "running",
+        "timestamp": "2025-08-03T18:56:16.720566032-05:00",
+        "executable_path": "/home/cy/mcp-workspace/servers/chroma-server/chroma-mcp",
+        "start_time": "0001-01-01T00:00:00Z",
+        "user": "cy",
+        "command_line": "/home/cy/mcp-workspace/servers/chroma-server/chroma-mcp ",
+        "build_info": {
+          "mode": "-rwxr-xr-x",
+          "modified": "2025-08-02T18:04:43-05:00",
+          "size": "10664113"
+        },
+        "network_exposure": {}
+      },
+      {
+        "id": "24fcc929-c8b9-4092-9ee7-afeaec6352b8",
+        "name": "python",
+        "type": "server",
+        "version": "unknown",
+        "process_id": 88228,
+        "status": "running",
+        "timestamp": "2025-08-03T18:56:16.740188-05:00",
+        "executable_path": "/usr/bin/python3.11",
+        "start_time": "0001-01-01T00:00:00Z",
+        "user": "cy",
+        "command_line": "/home/cy/.claude-mcp-servers/gemini-venv/bin/python /home/cy/.claude-mcp-servers/gemini-collab/server.py ",
+        "build_info": {
+          "mode": "-rwxr-xr-x",
+          "modified": "2025-04-28T09:11:48-05:00",
+          "size": "6831736"
+        },
+        "network_exposure": {}
+      }
+    ],
+    "package_info": {
+      "manager": "go",
+      "manifest": "go.mod"
+    },
+    "summary_stats": {
+      "direct_dependencies": 13,
+      "licenses": {
+        "permissive": 0,
+        "copyleft": 0,
+        "commercial": 0,
+        "unknown": 0
+      },
+      "total_dependencies": 13,
+      "transitive_dependencies": 0,
+      "vulnerabilities": {
+        "critical": 0,
+        "high": 0,
+        "medium": 0,
+        "low": 0
+      }
+    }
+  }
+}

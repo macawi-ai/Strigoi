@@ -44,3 +44,12 @@ Which security testing area does this enhance?
 - [ ] Authentication/Authorization
 - [ ] Data Flow Analysis
 - [ ] Other: _______________
+
+## Target Version
+Which version should this feature target? (See [SESSION_ROADMAP.md](../../docs/SESSION_ROADMAP.md))
+- [ ] v0.6.0 (Core Session Management)
+- [ ] v0.7.0 (Enhanced Features)
+- [ ] v0.8.0 (Advanced Capabilities)
+- [ ] v0.9.0 (Stabilization)
+- [ ] v1.0.0 (Production)
+- [ ] Future

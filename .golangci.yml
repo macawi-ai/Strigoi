@@ -1,24 +1,6 @@
 # golangci-lint configuration
 run:
   timeout: 5m
-  skip-dirs:
-    - archive
-    - archives
-    - cmd/migrate
-    - cmd/migrate-vulns
-    - cmd/registry
-    - cmd/gemini-bridge
-    - cmd/package-demo
-    - cmd/strigoi-debug
-    - demos
-    - internal/licensing
-    - internal/packages
-    - internal/ai/realtime
-    - internal/stream/filters
-    - protocols/mcp/implementation
-  skip-files:
-    - ".*\\.bak$"
-    - "test_.*"
 
 linters:
   enable:
@@ -67,6 +49,24 @@ linters-settings:
       - name: unused-parameter
 
 issues:
+  exclude-dirs:
+    - archive
+    - archives
+    - cmd/migrate
+    - cmd/migrate-vulns
+    - cmd/registry
+    - cmd/gemini-bridge
+    - cmd/package-demo
+    - cmd/strigoi-debug
+    - demos
+    - internal/licensing
+    - internal/packages
+    - internal/ai/realtime
+    - internal/stream/filters
+    - protocols/mcp/implementation
+  exclude-files:
+    - ".*\\.bak$"
+    - "test_.*"
   exclude-rules:
     # Exclude some linters from running on tests files
     - path: _test\.go
