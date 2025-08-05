@@ -1,0 +1,212 @@
+# Strigoi Security Platform - GoReleaser Configuration
+project_name: strigoi
+
+before:
+  hooks:
+    - go mod tidy
+    - go generate ./...
+    - go test ./...
+
+builds:
+  - id: strigoi
+    binary: strigoi
+    main: ./cmd/strigoi
+    env:
+      - CGO_ENABLED=1
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w
+      - -X main.version={{.Version}}
+      - -X main.commit={{.Commit}}
+      - -X main.date={{.Date}}
+      - -X main.builtBy=goreleaser
+    flags:
+      - -trimpath
+    mod_timestamp: '{{ .CommitTimestamp }}'
+
+  - id: audit
+    binary: audit
+    main: ./security_audit/cmd/audit
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+      - 386
+    ldflags:
+      - -s -w
+      - -X main.version={{.Version}}
+      - -X main.commit={{.Commit}}
+      - -X main.date={{.Date}}
+    flags:
+      - -trimpath
+
+archives:
+  - id: strigoi-archive
+    name_template: >-
+      {{ .ProjectName }}_
+      {{- .Version }}_
+      {{- title .Os }}_
+      {{- if eq .Arch "amd64" }}x86_64
+      {{- else if eq .Arch "386" }}i386
+      {{- else }}{{ .Arch }}{{ end }}
+    format_overrides:
+      - goos: windows
+        format: zip
+    files:
+      - README.md
+      - LICENSE
+      - configs/default.yaml
+      - docs/*
+
+checksum:
+  name_template: 'checksums.txt'
+  algorithm: sha256
+
+snapshot:
+  name_template: "{{ incpatch .Version }}-next"
+
+changelog:
+  sort: asc
+  use: github
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+      - '^chore:'
+      - Merge pull request
+      - Merge remote-tracking branch
+      - Merge branch
+  groups:
+    - title: 'New Features'
+      regexp: "^.*feat[(\\w)]*:+.*$"
+      order: 0
+    - title: 'Bug Fixes'
+      regexp: "^.*fix[(\\w)]*:+.*$"
+      order: 1
+    - title: 'Security Updates'
+      regexp: "^.*sec[(\\w)]*:+.*$"
+      order: 2
+    - title: 'Performance Improvements'
+      regexp: "^.*perf[(\\w)]*:+.*$"
+      order: 3
+    - title: 'Other Changes'
+      order: 999
+
+dockers:
+  - id: strigoi-docker
+    image_templates:
+      - "ghcr.io/macawi-ai/strigoi:{{ .Tag }}"
+      - "ghcr.io/macawi-ai/strigoi:{{ .Major }}"
+      - "ghcr.io/macawi-ai/strigoi:{{ .Major }}.{{ .Minor }}"
+      - "ghcr.io/macawi-ai/strigoi:latest"
+    skip_push: false
+    dockerfile: Dockerfile
+    use: buildx
+    build_flag_templates:
+      - "--pull"
+      - "--label=org.opencontainers.image.created={{.Date}}"
+      - "--label=org.opencontainers.image.title={{.ProjectName}}"
+      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+      - "--label=org.opencontainers.image.version={{.Version}}"
+      - "--platform=linux/amd64,linux/arm64"
+
+nfpms:
+  - id: strigoi-packages
+    package_name: strigoi
+    vendor: Strigoi Security
+    homepage: https://github.com/macawi-ai/strigoi
+    maintainer: Strigoi Team <security@strigoi.io>
+    description: Advanced security monitoring and threat detection platform
+    license: MIT
+    formats:
+      - deb
+      - rpm
+      - apk
+    dependencies:
+      - libpcap
+    recommends:
+      - docker
+    contents:
+      - src: ./configs/default.yaml
+        dst: /etc/strigoi/config.yaml
+        type: config
+      - src: ./scripts/strigoi.service
+        dst: /etc/systemd/system/strigoi.service
+        type: config
+      - dst: /var/log/strigoi
+        type: dir
+        file_info:
+          mode: 0755
+      - dst: /var/lib/strigoi
+        type: dir
+        file_info:
+          mode: 0755
+    scripts:
+      postinstall: ./scripts/postinstall.sh
+      preremove: ./scripts/preremove.sh
+    rpm:
+      compression: xz
+    deb:
+      compression: xz
+
+release:
+  github:
+    owner: macawi-ai
+    name: strigoi
+  draft: true
+  prerelease: auto
+  name_template: "Strigoi v{{.Version}}"
+  header: |
+    ## Strigoi Security Platform v{{.Version}}
+    
+    Advanced security monitoring and threat detection platform.
+  footer: |
+    ## Thanks!
+    
+    Thanks to all contributors who made this release possible!
+  
+signs:
+  - cmd: cosign
+    args:
+      - sign-blob
+      - '--key=cosign.key'
+      - '--output-signature=${signature}'
+      - '${artifact}'
+    artifacts: checksum
+    output: true
+
+sboms:
+  - artifacts: archive
+    cmd: syft
+    args: ["$artifact", "--file", "${artifact}.sbom.json", "--output", "cyclonedx-json"]
+
+announce:
+  slack:
+    enabled: true
+    message_template: 'Strigoi {{.Tag}} is out! Check it out: https://github.com/macawi-ai/strigoi/releases/tag/{{ .Tag }}'
+    channel: '#releases'
+    username: 'GoReleaser'
+    icon_emoji: ':rocket:'
+
+  discord:
+    enabled: true
+    message_template: '**Strigoi {{.Tag}}** is out! Check it out: https://github.com/macawi-ai/strigoi/releases/tag/{{ .Tag }}'
+    author: 'GoReleaser'
+    color: '3888754'
+    icon_url: 'https://avatars.githubusercontent.com/u/24803604?s=200&v=4'
+
+milestones:
+  - close: true
+    fail_on_error: false
+    name_template: "{{ .Tag }}"

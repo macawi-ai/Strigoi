@@ -1,0 +1,82 @@
+syntax = "proto3";
+
+package probe;
+option go_package = "github.com/macawi-ai/strigoi/modules/probe";
+
+import "google/protobuf/timestamp.proto";
+
+// MDTTEREvent represents a security event in multi-dimensional topological space
+message MDTTEREvent {
+  // Metadata
+  string event_id = 1;
+  google.protobuf.Timestamp timestamp = 2;
+  
+  // Traditional flat data (for compatibility)
+  string source_ip = 3;
+  string destination_ip = 4;
+  uint32 destination_port = 5;
+  string protocol = 6;
+  string action = 7;
+  
+  // Topological context
+  TopologicalPosition ast_position = 8;
+  TopologicalPosition dse_position = 9;
+  
+  // Behavioral data
+  repeated float behavioral_embedding = 10;
+  BehavioralManifold manifold_descriptor = 11;
+  
+  // Variety and intent
+  float variety_absorption_metric = 12;
+  IntentProbabilities intent_field = 13;
+  
+  // Topology changes
+  repeated TopologyMorphOp topology_changes = 14;
+  
+  // Session context
+  string session_id = 15;
+  string application_protocol = 16;
+}
+
+// TopologicalPosition represents a node's position in attack/defense topology
+message TopologicalPosition {
+  string node_id = 1;
+  repeated string connected_nodes = 2;
+  map<string, float> attributes = 3;
+  repeated float graph_embedding = 4;
+}
+
+// BehavioralManifold captures behavior as trajectories on smooth manifolds
+message BehavioralManifold {
+  repeated float point = 1;
+  repeated float tangent_vector = 2;
+  float curvature = 3;
+  float distance_from_normal = 4;
+}
+
+// IntentProbabilities represents attacker intent as probability distributions
+message IntentProbabilities {
+  float reconnaissance = 1;
+  float initial_access = 2;
+  float lateral_movement = 3;
+  float privilege_escalation = 4;
+  float data_collection = 5;
+  float exfiltration = 6;
+  float impact = 7;
+  map<string, float> custom_intents = 8;
+}
+
+// TopologyMorphOp represents a change in topology
+message TopologyMorphOp {
+  enum OpType {
+    ADD_NODE = 0;
+    REMOVE_NODE = 1;
+    ADD_EDGE = 2;
+    REMOVE_EDGE = 3;
+    UPDATE_ATTRIBUTE = 4;
+  }
+  OpType operation = 1;
+  string target_id = 2;
+  map<string, string> parameters = 3;
+  google.protobuf.Timestamp timestamp = 4;
+}

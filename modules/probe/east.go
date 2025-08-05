@@ -555,7 +555,7 @@ func (m *EastModule) filterByConfidence(findings []Finding) []Finding {
 	return filtered
 }
 
-// determineSeverity calculates severity based on finding type and category
+// determineSeverity calculates severity based on finding type and category.
 func (m *EastModule) determineSeverity(findingType, category string) string {
 	// Critical severity patterns
 	criticalPatterns := map[string]bool{

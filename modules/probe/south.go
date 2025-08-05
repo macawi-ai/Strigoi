@@ -18,14 +18,14 @@ func init() {
 	modules.RegisterBuiltin("probe/south", NewSouthModule)
 }
 
-// SouthModule probes dependencies and supply chain
+// SouthModule probes dependencies and supply chain.
 type SouthModule struct {
 	modules.BaseModule
 	executor   *security.SecureExecutor
 	mcpScanner *security.MCPScanner
 }
 
-// NewSouthModule creates a new South probe module
+// NewSouthModule creates a new South probe module.
 func NewSouthModule() modules.Module {
 	return &SouthModule{
 		BaseModule: modules.BaseModule{
@@ -89,7 +89,7 @@ func NewSouthModule() modules.Module {
 	}
 }
 
-// Check verifies the module can run
+// Check verifies the module can run.
 func (m *SouthModule) Check() bool {
 	// Verify target exists
 	targetOpt, _ := m.GetOption("target")
@@ -103,7 +103,7 @@ func (m *SouthModule) Check() bool {
 	return true
 }
 
-// Info returns module metadata
+// Info returns module metadata.
 func (m *SouthModule) Info() *modules.ModuleInfo {
 	return &modules.ModuleInfo{
 		Author:  "Strigoi Team",
@@ -116,7 +116,7 @@ func (m *SouthModule) Info() *modules.ModuleInfo {
 	}
 }
 
-// Run executes the south probe
+// Run executes the south probe.
 func (m *SouthModule) Run() (*modules.ModuleResult, error) {
 	startTime := time.Now()
 
@@ -207,7 +207,7 @@ func (m *SouthModule) Run() (*modules.ModuleResult, error) {
 	}, nil
 }
 
-// detectPackageManager identifies the package manager in use
+// detectPackageManager identifies the package manager in use.
 func (m *SouthModule) detectPackageManager(path string) (string, string) {
 	// Check for manifest files
 	manifests := map[string]string{
@@ -232,7 +232,7 @@ func (m *SouthModule) detectPackageManager(path string) (string, string) {
 	return "", ""
 }
 
-// analyzeNPM analyzes Node.js dependencies
+// analyzeNPM analyzes Node.js dependencies.
 func (m *SouthModule) analyzeNPM(path string, result *SupplyChainResult) error {
 	// Read package.json
 	packageJSON := filepath.Join(path, "package.json")
@@ -281,7 +281,7 @@ func (m *SouthModule) analyzeNPM(path string, result *SupplyChainResult) error {
 	return nil
 }
 
-// analyzePip analyzes Python dependencies
+// analyzePip analyzes Python dependencies.
 func (m *SouthModule) analyzePip(path string, result *SupplyChainResult) error {
 	// Check for requirements.txt
 	reqFile := filepath.Join(path, "requirements.txt")
@@ -326,7 +326,7 @@ func (m *SouthModule) analyzePip(path string, result *SupplyChainResult) error {
 	return nil
 }
 
-// analyzeGo analyzes Go dependencies
+// analyzeGo analyzes Go dependencies.
 func (m *SouthModule) analyzeGo(path string, result *SupplyChainResult) error {
 	// Read go.mod
 	goMod := filepath.Join(path, "go.mod")
@@ -374,7 +374,7 @@ func (m *SouthModule) analyzeGo(path string, result *SupplyChainResult) error {
 	return nil
 }
 
-// calculateSummary generates summary statistics
+// calculateSummary generates summary statistics.
 func (m *SouthModule) calculateSummary(result *SupplyChainResult) Summary {
 	summary := Summary{
 		TotalDependencies: len(result.Dependencies),
@@ -431,7 +431,7 @@ func (m *SouthModule) calculateSummary(result *SupplyChainResult) Summary {
 	return summary
 }
 
-// Helper functions for license classification
+// Helper functions for license classification.
 func isPermissiveLicense(license string) bool {
 	permissive := []string{"MIT", "Apache-2.0", "BSD-3-Clause", "BSD-2-Clause", "ISC"}
 	license = strings.ToUpper(license)
@@ -465,7 +465,7 @@ func isCommercialLicense(license string) bool {
 	return false
 }
 
-// Stub implementations for tool runners
+// Stub implementations for tool runners.
 func (m *SouthModule) runNPMAudit(_ string) ([]Vulnerability, error) {
 	// TODO: Implement actual npm audit integration
 	return []Vulnerability{}, nil

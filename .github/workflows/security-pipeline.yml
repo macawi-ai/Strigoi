@@ -1,0 +1,351 @@
+name: Strigoi Security Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    # Run daily security audit
+    - cron: '0 0 * * *'
+
+env:
+  GO_VERSION: '1.20'
+  GOLANGCI_LINT_VERSION: 'v1.54.2'
+
+jobs:
+  # Build and basic tests
+  build:
+    name: Build and Test
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        go-version: ['1.19', '1.20', '1.21']
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: ${{ matrix.go-version }}
+      
+      - name: Cache Go modules
+        uses: actions/cache@v3
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+      
+      - name: Build
+        run: |
+          go build -v ./...
+          go build -race -v ./...
+      
+      - name: Run tests
+        run: go test -v -race -coverprofile=coverage.txt -covermode=atomic ./...
+      
+      - name: Upload coverage
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./coverage.txt
+          flags: unittests
+          name: codecov-umbrella
+
+  # Static Analysis
+  static-analysis:
+    name: Static Analysis
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: ${{ env.GO_VERSION }}
+      
+      - name: Run golangci-lint
+        uses: golangci/golangci-lint-action@v3
+        with:
+          version: ${{ env.GOLANGCI_LINT_VERSION }}
+          args: --timeout=5m
+      
+      - name: Run go vet
+        run: go vet ./...
+      
+      - name: Run staticcheck
+        uses: dominikh/staticcheck-action@v1.3.0
+        with:
+          version: "2023.1.6"
+      
+      - name: Check for ineffective assignments
+        run: |
+          go install github.com/gordonklaus/ineffassign@latest
+          ineffassign ./...
+      
+      - name: Check for misspellings
+        run: |
+          go install github.com/client9/misspell/cmd/misspell@latest
+          misspell -error .
+
+  # Security Scanning
+  security-scan:
+    name: Security Scanning
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: ${{ env.GO_VERSION }}
+      
+      - name: Run Strigoi Security Audit
+        run: |
+          go install ./modules/probe/security_audit/cmd/audit
+          audit -all -max-critical 0 -max-high 5 -format json -output audit.json
+      
+      - name: Upload Security Report
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: security-audit-report
+          path: audit.json
+      
+      - name: Run gosec security scanner
+        uses: securego/gosec@master
+        with:
+          args: '-fmt sarif -out gosec.sarif ./...'
+      
+      - name: Upload SARIF file
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: gosec.sarif
+      
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+      
+      - name: Upload Trivy SARIF
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: trivy-results.sarif
+
+  # Dependency Check
+  dependency-check:
+    name: Dependency Security Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: ${{ env.GO_VERSION }}
+      
+      - name: Run go mod verify
+        run: go mod verify
+      
+      - name: Run go mod tidy
+        run: |
+          go mod tidy
+          git diff --exit-code go.mod go.sum
+      
+      - name: Run Nancy dependency check
+        run: |
+          go list -json -deps ./... | docker run --rm -i sonatypecorp/nancy:latest sleuth
+      
+      - name: Run govulncheck
+        run: |
+          go install golang.org/x/vuln/cmd/govulncheck@latest
+          govulncheck ./...
+
+  # License Compliance
+  license-check:
+    name: License Compliance Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: ${{ env.GO_VERSION }}
+      
+      - name: Install go-licenses
+        run: go install github.com/google/go-licenses@latest
+      
+      - name: Check licenses
+        run: |
+          go-licenses check ./...
+          go-licenses csv ./... > licenses.csv
+      
+      - name: Upload license report
+        uses: actions/upload-artifact@v3
+        with:
+          name: license-report
+          path: licenses.csv
+
+  # Performance Tests
+  performance-test:
+    name: Performance Tests
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: ${{ env.GO_VERSION }}
+      
+      - name: Run benchmarks on base
+        run: |
+          git checkout ${{ github.base_ref }}
+          go test -bench=. -benchmem -count=10 ./... > base-bench.txt
+      
+      - name: Run benchmarks on PR
+        run: |
+          git checkout ${{ github.head_ref }}
+          go test -bench=. -benchmem -count=10 ./... > pr-bench.txt
+      
+      - name: Compare benchmarks
+        run: |
+          go install golang.org/x/perf/cmd/benchstat@latest
+          benchstat base-bench.txt pr-bench.txt > bench-diff.txt
+          cat bench-diff.txt
+      
+      - name: Comment PR with benchmark results
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs');
+            const benchDiff = fs.readFileSync('bench-diff.txt', 'utf8');
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '## Benchmark Results\n\n```\n' + benchDiff + '\n```'
+            });
+
+  # Load Testing
+  load-test:
+    name: Load Testing
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule' || github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: ${{ env.GO_VERSION }}
+      
+      - name: Build load test binary
+        run: go build -o loadtest ./modules/probe/cmd/loadtest
+      
+      - name: Run load tests
+        run: |
+          ./loadtest -scenario all -duration 5m -output load-test-results.json
+      
+      - name: Upload load test results
+        uses: actions/upload-artifact@v3
+        with:
+          name: load-test-results
+          path: load-test-results.json
+
+  # Integration Tests
+  integration-test:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    services:
+      elasticsearch:
+        image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
+        env:
+          discovery.type: single-node
+          xpack.security.enabled: false
+        options: >-
+          --health-cmd "curl http://localhost:9200/_cluster/health"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+        ports:
+          - 9200:9200
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: ${{ env.GO_VERSION }}
+      
+      - name: Run integration tests
+        env:
+          ELASTICSEARCH_URL: http://localhost:9200
+        run: |
+          go test -tags=integration -v ./...
+
+  # Release
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    needs: [build, static-analysis, security-scan, dependency-check, license-check]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: ${{ env.GO_VERSION }}
+      
+      - name: Run GoReleaser
+        uses: goreleaser/goreleaser-action@v5
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          version: latest
+          args: release --clean
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # Security Report Summary
+  security-summary:
+    name: Security Summary
+    runs-on: ubuntu-latest
+    needs: [security-scan, dependency-check]
+    if: always()
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v3
+      
+      - name: Generate security summary
+        run: |
+          echo "# Security Summary" > security-summary.md
+          echo "Generated: $(date)" >> security-summary.md
+          echo "" >> security-summary.md
+          
+          if [ -f security-audit-report/audit.json ]; then
+            echo "## Strigoi Security Audit" >> security-summary.md
+            jq -r '.summary' security-audit-report/audit.json >> security-summary.md
+          fi
+          
+          echo "" >> security-summary.md
+          echo "## Actions Summary" >> security-summary.md
+          echo "- Build: ${{ needs.build.result }}" >> security-summary.md
+          echo "- Security Scan: ${{ needs.security-scan.result }}" >> security-summary.md
+          echo "- Dependency Check: ${{ needs.dependency-check.result }}" >> security-summary.md
+      
+      - name: Upload summary
+        uses: actions/upload-artifact@v3
+        with:
+          name: security-summary
+          path: security-summary.md

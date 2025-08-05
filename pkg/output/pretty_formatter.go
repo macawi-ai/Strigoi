@@ -1407,7 +1407,7 @@ func (f *PrettyFormatter) formatExternalServices(sb *strings.Builder, services [
 	}
 }
 
-// formatFindingType returns a human-readable finding type
+// formatFindingType returns a human-readable finding type.
 func formatFindingType(findingType, category string) string {
 	typeMap := map[string]map[string]string{
 		"hardcoded_secret": {
@@ -1445,7 +1445,7 @@ func formatFindingType(findingType, category string) string {
 	return titleCaseWords(strings.ReplaceAll(findingType, "_", " "))
 }
 
-// padRight pads a string with spaces to the right to reach the desired width
+// padRight pads a string with spaces to the right to reach the desired width.
 func padRight(s string, width int) string {
 	if len(s) >= width {
 		return s[:width]
@@ -1453,7 +1453,7 @@ func padRight(s string, width int) string {
 	return s + strings.Repeat(" ", width-len(s))
 }
 
-// truncateString truncates a string to maxLen
+// truncateString truncates a string to maxLen.
 func truncateString(s string, maxLen int) string {
 	if len(s) <= maxLen {
 		return s

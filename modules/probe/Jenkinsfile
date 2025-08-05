@@ -1,0 +1,303 @@
+// Strigoi Security Platform - Jenkins Pipeline
+pipeline {
+    agent {
+        label 'docker && linux'
+    }
+    
+    environment {
+        GO_VERSION = '1.20'
+        GOLANGCI_LINT_VERSION = 'v1.54.2'
+        DOCKER_REGISTRY = credentials('docker-registry')
+        SONAR_TOKEN = credentials('sonar-token')
+    }
+    
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '10'))
+        timeout(time: 60, unit: 'MINUTES')
+        timestamps()
+        ansiColor('xterm')
+    }
+    
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+                script {
+                    env.GIT_COMMIT_SHORT = sh(returnStdout: true, script: "git rev-parse --short HEAD").trim()
+                    env.GIT_BRANCH = sh(returnStdout: true, script: "git rev-parse --abbrev-ref HEAD").trim()
+                }
+            }
+        }
+        
+        stage('Setup') {
+            steps {
+                sh '''
+                    # Install Go if not present
+                    if ! command -v go &> /dev/null; then
+                        wget https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz
+                        tar -C /usr/local -xzf go${GO_VERSION}.linux-amd64.tar.gz
+                        export PATH=$PATH:/usr/local/go/bin
+                    fi
+                    
+                    go version
+                    go mod download
+                '''
+            }
+        }
+        
+        stage('Build') {
+            parallel {
+                stage('Build Binary') {
+                    steps {
+                        sh '''
+                            go build -v ./...
+                            go build -race -v ./...
+                        '''
+                    }
+                }
+                
+                stage('Build Docker') {
+                    when {
+                        branch pattern: "(main|develop|release/.*)", comparator: "REGEXP"
+                    }
+                    steps {
+                        script {
+                            docker.build("strigoi:${env.GIT_COMMIT_SHORT}")
+                        }
+                    }
+                }
+            }
+        }
+        
+        stage('Test') {
+            parallel {
+                stage('Unit Tests') {
+                    steps {
+                        sh '''
+                            go test -v -race -coverprofile=coverage.out -covermode=atomic ./...
+                            go tool cover -html=coverage.out -o coverage.html
+                        '''
+                        publishHTML([
+                            allowMissing: false,
+                            alwaysLinkToLastBuild: true,
+                            keepAll: true,
+                            reportDir: '.',
+                            reportFiles: 'coverage.html',
+                            reportName: 'Coverage Report'
+                        ])
+                    }
+                }
+                
+                stage('Integration Tests') {
+                    steps {
+                        script {
+                            docker.image('docker.elastic.co/elasticsearch/elasticsearch:8.11.0').withRun(
+                                '-e "discovery.type=single-node" -e "xpack.security.enabled=false"'
+                            ) { c ->
+                                sh """
+                                    export ELASTICSEARCH_URL=http://localhost:9200
+                                    # Wait for Elasticsearch
+                                    timeout 60 bash -c 'until curl -s http://localhost:9200/_cluster/health; do sleep 2; done'
+                                    go test -tags=integration -v ./...
+                                """
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        stage('Security Analysis') {
+            parallel {
+                stage('Static Analysis') {
+                    steps {
+                        sh '''
+                            # Install golangci-lint
+                            curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin ${GOLANGCI_LINT_VERSION}
+                            
+                            golangci-lint run --timeout=5m ./...
+                        '''
+                    }
+                }
+                
+                stage('Security Scan') {
+                    steps {
+                        sh '''
+                            # Install security tools
+                            go install github.com/securego/gosec/v2/cmd/gosec@latest
+                            go install golang.org/x/vuln/cmd/govulncheck@latest
+                            
+                            # Run scans
+                            gosec -fmt json -out gosec-report.json ./...
+                            govulncheck ./...
+                        '''
+                        
+                        recordIssues(
+                            enabledForFailure: true,
+                            tools: [
+                                goSec(pattern: 'gosec-report.json')
+                            ]
+                        )
+                    }
+                }
+                
+                stage('Dependency Check') {
+                    steps {
+                        sh '''
+                            go mod verify
+                            go mod tidy
+                            git diff --exit-code go.mod go.sum
+                        '''
+                    }
+                }
+                
+                stage('Strigoi Audit') {
+                    steps {
+                        sh '''
+                            go install ./security_audit/cmd/audit
+                            audit -all -max-critical 0 -max-high 5 -format json -output audit-report.json
+                        '''
+                        archiveArtifacts artifacts: 'audit-report.json', fingerprint: true
+                    }
+                }
+            }
+        }
+        
+        stage('Performance') {
+            when {
+                anyOf {
+                    branch 'main'
+                    changeRequest()
+                }
+            }
+            steps {
+                sh '''
+                    # Run benchmarks
+                    go test -bench=. -benchmem -count=10 ./... | tee benchmark.txt
+                    
+                    # Install benchstat
+                    go install golang.org/x/perf/cmd/benchstat@latest
+                    
+                    # Compare with base branch if PR
+                    if [ -n "$CHANGE_TARGET" ]; then
+                        git fetch origin $CHANGE_TARGET
+                        git checkout FETCH_HEAD
+                        go test -bench=. -benchmem -count=10 ./... > base-bench.txt
+                        git checkout -
+                        benchstat base-bench.txt benchmark.txt > bench-comparison.txt
+                    fi
+                '''
+                
+                archiveArtifacts artifacts: 'benchmark.txt,bench-comparison.txt', allowEmptyArchive: true
+            }
+        }
+        
+        stage('SonarQube Analysis') {
+            when {
+                branch pattern: "(main|develop)", comparator: "REGEXP"
+            }
+            steps {
+                withSonarQubeEnv('SonarQube') {
+                    sh '''
+                        # Run SonarQube scanner
+                        sonar-scanner \
+                            -Dsonar.projectKey=strigoi \
+                            -Dsonar.sources=. \
+                            -Dsonar.go.coverage.reportPaths=coverage.out \
+                            -Dsonar.exclusions="**/*_test.go,**/vendor/**,**/testdata/**"
+                    '''
+                }
+            }
+        }
+        
+        stage('Quality Gate') {
+            when {
+                branch pattern: "(main|develop)", comparator: "REGEXP"
+            }
+            steps {
+                timeout(time: 5, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: true
+                }
+            }
+        }
+        
+        stage('Deploy') {
+            when {
+                branch 'main'
+            }
+            parallel {
+                stage('Push Docker Image') {
+                    steps {
+                        script {
+                            docker.withRegistry("https://${DOCKER_REGISTRY}", 'docker-credentials') {
+                                def image = docker.build("strigoi:${env.GIT_COMMIT_SHORT}")
+                                image.push()
+                                image.push('latest')
+                            }
+                        }
+                    }
+                }
+                
+                stage('Release') {
+                    when {
+                        tag pattern: "v\\d+\\.\\d+\\.\\d+", comparator: "REGEXP"
+                    }
+                    steps {
+                        sh '''
+                            # Install goreleaser
+                            go install github.com/goreleaser/goreleaser@latest
+                            
+                            # Create release
+                            goreleaser release --clean
+                        '''
+                        
+                        archiveArtifacts artifacts: 'dist/**/*', fingerprint: true
+                    }
+                }
+            }
+        }
+    }
+    
+    post {
+        always {
+            // Collect test results
+            junit allowEmptyResults: true, testResults: '**/test-results/*.xml'
+            
+            // Archive important artifacts
+            archiveArtifacts artifacts: 'coverage.out,audit-report.json', allowEmptyArchive: true
+            
+            // Clean workspace
+            cleanWs()
+        }
+        
+        success {
+            echo 'Pipeline succeeded!'
+            // Send success notification
+            emailext(
+                subject: "SUCCESS: ${env.JOB_NAME} - ${env.BUILD_NUMBER}",
+                body: "The pipeline completed successfully.\n\nCommit: ${env.GIT_COMMIT_SHORT}\nBranch: ${env.GIT_BRANCH}",
+                to: '${DEFAULT_RECIPIENTS}'
+            )
+        }
+        
+        failure {
+            echo 'Pipeline failed!'
+            // Send failure notification
+            emailext(
+                subject: "FAILURE: ${env.JOB_NAME} - ${env.BUILD_NUMBER}",
+                body: "The pipeline failed. Please check the logs.\n\nCommit: ${env.GIT_COMMIT_SHORT}\nBranch: ${env.GIT_BRANCH}",
+                to: '${DEFAULT_RECIPIENTS}'
+            )
+        }
+        
+        unstable {
+            echo 'Pipeline unstable!'
+            // Send unstable notification
+            emailext(
+                subject: "UNSTABLE: ${env.JOB_NAME} - ${env.BUILD_NUMBER}",
+                body: "The pipeline is unstable. Tests may have failed.\n\nCommit: ${env.GIT_COMMIT_SHORT}\nBranch: ${env.GIT_BRANCH}",
+                to: '${DEFAULT_RECIPIENTS}'
+            )
+        }
+    }
+}

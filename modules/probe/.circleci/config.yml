@@ -1,0 +1,350 @@
+# Strigoi Security Platform - CircleCI Configuration
+version: 2.1
+
+orbs:
+  go: circleci/go@1.7.3
+  docker: circleci/docker@2.2.0
+  codecov: codecov/codecov@3.2.4
+
+executors:
+  go-executor:
+    docker:
+      - image: cimg/go:1.20
+    resource_class: large
+    working_directory: ~/strigoi
+
+  go-with-services:
+    docker:
+      - image: cimg/go:1.20
+      - image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
+        environment:
+          discovery.type: single-node
+          xpack.security.enabled: false
+          ES_JAVA_OPTS: "-Xms512m -Xmx512m"
+    resource_class: large
+    working_directory: ~/strigoi
+
+commands:
+  install-tools:
+    description: "Install required tools"
+    steps:
+      - run:
+          name: Install security tools
+          command: |
+            go install github.com/securego/gosec/v2/cmd/gosec@latest
+            go install golang.org/x/vuln/cmd/govulncheck@latest
+            go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.54.2
+            go install golang.org/x/perf/cmd/benchstat@latest
+
+  wait-for-elasticsearch:
+    description: "Wait for Elasticsearch to be ready"
+    steps:
+      - run:
+          name: Wait for Elasticsearch
+          command: |
+            for i in {1..30}; do
+              if curl -s http://localhost:9200/_cluster/health; then
+                break
+              fi
+              echo "Waiting for Elasticsearch..."
+              sleep 2
+            done
+
+jobs:
+  build:
+    executor: go-executor
+    steps:
+      - checkout
+      - go/load-cache
+      - go/mod-download
+      - go/save-cache
+      - run:
+          name: Build project
+          command: |
+            go build -v ./...
+            go build -race -v ./...
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .
+
+  test-unit:
+    executor: go-executor
+    steps:
+      - attach_workspace:
+          at: .
+      - go/load-cache
+      - run:
+          name: Run unit tests
+          command: |
+            mkdir -p test-results
+            gotestsum --junitfile test-results/unit-tests.xml -- -v -race -coverprofile=coverage.txt -covermode=atomic ./...
+      - codecov/upload:
+          file: coverage.txt
+      - store_test_results:
+          path: test-results
+      - store_artifacts:
+          path: test-results
+      - store_artifacts:
+          path: coverage.txt
+
+  test-integration:
+    executor: go-with-services
+    steps:
+      - attach_workspace:
+          at: .
+      - go/load-cache
+      - wait-for-elasticsearch
+      - run:
+          name: Run integration tests
+          command: |
+            export ELASTICSEARCH_URL=http://localhost:9200
+            mkdir -p test-results
+            gotestsum --junitfile test-results/integration-tests.xml -- -tags=integration -v ./...
+      - store_test_results:
+          path: test-results
+      - store_artifacts:
+          path: test-results
+
+  static-analysis:
+    executor: go-executor
+    steps:
+      - attach_workspace:
+          at: .
+      - go/load-cache
+      - install-tools
+      - run:
+          name: Run golangci-lint
+          command: golangci-lint run --timeout=5m ./...
+      - run:
+          name: Run go vet
+          command: go vet ./...
+      - run:
+          name: Check formatting
+          command: |
+            if [ -n "$(gofmt -l .)" ]; then
+              echo "Go files must be formatted with gofmt"
+              gofmt -d .
+              exit 1
+            fi
+
+  security-scan:
+    executor: go-executor
+    steps:
+      - attach_workspace:
+          at: .
+      - go/load-cache
+      - install-tools
+      - run:
+          name: Run gosec
+          command: |
+            gosec -fmt json -out gosec-report.json ./...
+            gosec -fmt text ./...
+      - run:
+          name: Run govulncheck
+          command: govulncheck ./...
+      - run:
+          name: Check dependencies
+          command: |
+            go mod verify
+            go mod tidy
+            git diff --exit-code go.mod go.sum
+      - store_artifacts:
+          path: gosec-report.json
+
+  strigoi-audit:
+    executor: go-executor
+    steps:
+      - attach_workspace:
+          at: .
+      - go/load-cache
+      - run:
+          name: Install audit tool
+          command: go install ./security_audit/cmd/audit
+      - run:
+          name: Run security audit
+          command: |
+            audit -all -max-critical 0 -max-high 5 -format json -output audit-report.json
+            audit -all -format markdown -output audit-report.md
+      - store_artifacts:
+          path: audit-report.json
+      - store_artifacts:
+          path: audit-report.md
+
+  performance-test:
+    executor: go-executor
+    steps:
+      - attach_workspace:
+          at: .
+      - go/load-cache
+      - install-tools
+      - run:
+          name: Run benchmarks
+          command: |
+            go test -bench=. -benchmem -count=10 ./... | tee benchmark.txt
+      - when:
+          condition: << pipeline.git.branch >> != main
+          steps:
+            - run:
+                name: Compare benchmarks
+                command: |
+                  git fetch origin main
+                  git checkout FETCH_HEAD
+                  go test -bench=. -benchmem -count=10 ./... > base-bench.txt
+                  git checkout -
+                  benchstat base-bench.txt benchmark.txt > bench-comparison.txt
+                  cat bench-comparison.txt
+      - store_artifacts:
+          path: benchmark.txt
+      - store_artifacts:
+          path: bench-comparison.txt
+
+  load-test:
+    executor: go-executor
+    steps:
+      - attach_workspace:
+          at: .
+      - go/load-cache
+      - run:
+          name: Build load test binary
+          command: go build -o loadtest ./cmd/loadtest
+      - run:
+          name: Run load tests
+          command: |
+            ./loadtest -scenario all -duration 5m -output load-test-results.json
+            # Extract summary metrics
+            jq '.summary' load-test-results.json
+      - store_artifacts:
+          path: load-test-results.json
+
+  build-docker:
+    executor: docker/docker
+    steps:
+      - setup_remote_docker
+      - checkout
+      - docker/check
+      - docker/build:
+          image: strigoi
+          tag: ${CIRCLE_SHA1:0:7},latest
+      - when:
+          condition:
+            equal: [ main, << pipeline.git.branch >> ]
+          steps:
+            - docker/push:
+                image: strigoi
+                tag: ${CIRCLE_SHA1:0:7},latest
+
+  release:
+    executor: go-executor
+    steps:
+      - attach_workspace:
+          at: .
+      - go/load-cache
+      - run:
+          name: Install goreleaser
+          command: go install github.com/goreleaser/goreleaser@latest
+      - run:
+          name: Create release
+          command: goreleaser release --clean
+      - store_artifacts:
+          path: dist/
+
+workflows:
+  version: 2
+  
+  build-and-test:
+    jobs:
+      - build:
+          filters:
+            tags:
+              only: /^v.*/
+      
+      - test-unit:
+          requires:
+            - build
+          filters:
+            tags:
+              only: /^v.*/
+      
+      - test-integration:
+          requires:
+            - build
+          filters:
+            tags:
+              only: /^v.*/
+      
+      - static-analysis:
+          requires:
+            - build
+          filters:
+            tags:
+              only: /^v.*/
+      
+      - security-scan:
+          requires:
+            - build
+          filters:
+            tags:
+              only: /^v.*/
+      
+      - strigoi-audit:
+          requires:
+            - build
+          filters:
+            branches:
+              only:
+                - main
+                - develop
+            tags:
+              only: /^v.*/
+      
+      - performance-test:
+          requires:
+            - test-unit
+          filters:
+            branches:
+              only:
+                - main
+                - develop
+      
+      - build-docker:
+          requires:
+            - test-unit
+            - security-scan
+          filters:
+            branches:
+              only:
+                - main
+                - develop
+      
+      - release:
+          requires:
+            - test-unit
+            - test-integration
+            - security-scan
+            - static-analysis
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^v[0-9]+\.[0-9]+\.[0-9]+$/
+  
+  nightly:
+    triggers:
+      - schedule:
+          cron: "0 0 * * *"
+          filters:
+            branches:
+              only:
+                - main
+    jobs:
+      - build
+      - strigoi-audit:
+          requires:
+            - build
+      - load-test:
+          requires:
+            - build
+      - performance-test:
+          requires:
+            - build

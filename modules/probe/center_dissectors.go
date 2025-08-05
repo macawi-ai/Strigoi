@@ -1,6 +1,7 @@
 package probe
 
 import (
+	"crypto/sha256"
 	"encoding/json"
 	"fmt"
 	"regexp"
@@ -114,6 +115,50 @@ func (d *JSONDissector) FindVulnerabilities(frame *Frame) []StreamVulnerability 
 	}
 
 	return vulns
+}
+
+// GetSessionID extracts session identifier from JSON frame.
+func (d *JSONDissector) GetSessionID(frame *Frame) (string, error) {
+	// For JSON, look for common session fields
+	sessionFields := []string{
+		"session_id", "sessionId", "session",
+		"request_id", "requestId", "correlation_id",
+		"trace_id", "traceId", "transaction_id",
+	}
+
+	for _, field := range sessionFields {
+		if val, ok := frame.Fields[field]; ok {
+			if strVal, ok := val.(string); ok && strVal != "" {
+				return fmt.Sprintf("json_%s", strVal), nil
+			}
+		}
+
+		// Check nested fields (e.g., "user.session_id")
+		for key, val := range frame.Fields {
+			if strings.Contains(key, field) {
+				if strVal, ok := val.(string); ok && strVal != "" {
+					return fmt.Sprintf("json_%s", strVal), nil
+				}
+			}
+		}
+	}
+
+	// Check for auth tokens that can serve as session IDs
+	authFields := []string{"token", "auth_token", "authToken", "access_token", "accessToken"}
+	for _, field := range authFields {
+		if val, ok := frame.Fields[field]; ok {
+			if strVal, ok := val.(string); ok && strVal != "" {
+				// Use first 16 chars of token as session ID
+				sessionID := strVal
+				if len(sessionID) > 16 {
+					sessionID = sessionID[:16]
+				}
+				return fmt.Sprintf("json_auth_%s", sessionID), nil
+			}
+		}
+	}
+
+	return "", fmt.Errorf("no session identifier found in JSON")
 }
 
 // flattenJSON recursively flattens JSON structure.
@@ -343,6 +388,39 @@ func (d *SQLDissector) FindVulnerabilities(frame *Frame) []StreamVulnerability {
 	return vulns
 }
 
+// GetSessionID extracts session identifier from SQL frame.
+func (d *SQLDissector) GetSessionID(frame *Frame) (string, error) {
+	// For SQL, we don't have inherent session IDs
+	// We can try to extract from query content
+	query, ok := frame.Fields["query"].(string)
+	if !ok {
+		return "", fmt.Errorf("no query in SQL frame")
+	}
+
+	// Look for session references in queries
+	sessionPatterns := []*regexp.Regexp{
+		regexp.MustCompile(`(?i)session_id\s*=\s*['"]?([^'"\s]+)['"]?`),
+		regexp.MustCompile(`(?i)WHERE\s+session\s*=\s*['"]?([^'"\s]+)['"]?`),
+		regexp.MustCompile(`(?i)user_session\s*=\s*['"]?([^'"\s]+)['"]?`),
+	}
+
+	for _, pattern := range sessionPatterns {
+		if matches := pattern.FindStringSubmatch(query); len(matches) > 1 {
+			return fmt.Sprintf("sql_query_%s", matches[1]), nil
+		}
+	}
+
+	// Use query type + table as session identifier for tracking related queries
+	if queryType, ok := frame.Fields["query_type"].(string); ok {
+		if tables, ok := frame.Fields["tables"].([]string); ok && len(tables) > 0 {
+			// Create a session ID based on operation and primary table
+			return fmt.Sprintf("sql_%s_%s", strings.ToLower(queryType), tables[0]), nil
+		}
+	}
+
+	return "", fmt.Errorf("no session identifier found in SQL")
+}
+
 // extractTableNames extracts table names from SQL query.
 func (d *SQLDissector) extractTableNames(query string) []string {
 	tables := []string{}
@@ -442,4 +520,36 @@ func (d *PlainTextDissector) FindVulnerabilities(frame *Frame) []StreamVulnerabi
 	}
 
 	return vulns
+}
+
+// GetSessionID extracts session identifier from plain text frame.
+func (d *PlainTextDissector) GetSessionID(frame *Frame) (string, error) {
+	// For plain text, we need to look for patterns that might indicate sessions
+	text, ok := frame.Fields["text"].(string)
+	if !ok {
+		return "", fmt.Errorf("no text in frame")
+	}
+
+	// Look for common session patterns in text
+	sessionPatterns := []*regexp.Regexp{
+		regexp.MustCompile(`(?i)session[_-]?id[:=]\s*([A-Za-z0-9_-]+)`),
+		regexp.MustCompile(`(?i)JSESSIONID=([A-Za-z0-9]+)`),
+		regexp.MustCompile(`(?i)PHPSESSID=([A-Za-z0-9]+)`),
+		regexp.MustCompile(`(?i)sid[:=]\s*([A-Za-z0-9_-]+)`),
+	}
+
+	for _, pattern := range sessionPatterns {
+		if matches := pattern.FindStringSubmatch(text); len(matches) > 1 {
+			return fmt.Sprintf("text_pattern_%s", matches[1]), nil
+		}
+	}
+
+	// As a fallback, use a hash of the first line or first 100 chars
+	lines := strings.Split(text, "\n")
+	if len(lines) > 0 && lines[0] != "" {
+		hash := sha256.Sum256([]byte(lines[0]))
+		return fmt.Sprintf("text_hash_%x", hash[:8]), nil
+	}
+
+	return "", fmt.Errorf("no session identifier found in plain text")
 }

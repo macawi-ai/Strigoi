@@ -173,13 +173,13 @@ func NewWestModule() modules.Module {
 	}
 }
 
-// Check verifies the module can run
+// Check verifies the module can run.
 func (m *WestModule) Check() bool {
 	// Verify we can make HTTPS requests
 	return true
 }
 
-// Configure sets up the module before execution
+// Configure sets up the module before execution.
 func (m *WestModule) Configure() error {
 	// Parse configuration from options
 	timeout := 30
@@ -262,7 +262,7 @@ func (m *WestModule) Configure() error {
 	return nil
 }
 
-// configureTLSClient sets up a secure HTTP client
+// configureTLSClient sets up a secure HTTP client.
 func (m *WestModule) configureTLSClient() {
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{
@@ -299,7 +299,7 @@ func (m *WestModule) configureTLSClient() {
 	}
 }
 
-// Run executes the authentication analysis
+// Run executes the authentication analysis.
 func (m *WestModule) Run() (*modules.ModuleResult, error) {
 	// Configure module
 	if err := m.Configure(); err != nil {
@@ -397,7 +397,7 @@ func (m *WestModule) Run() (*modules.ModuleResult, error) {
 	}, nil
 }
 
-// validateTarget ensures the target URL is valid and safe
+// validateTarget ensures the target URL is valid and safe.
 func (m *WestModule) validateTarget(target string) error {
 	// Ensure target has a scheme
 	if !strings.HasPrefix(target, "http://") && !strings.HasPrefix(target, "https://") {
@@ -427,7 +427,7 @@ func (m *WestModule) validateTarget(target string) error {
 	return nil
 }
 
-// isPrivateAddress checks if a hostname refers to a private IP
+// isPrivateAddress checks if a hostname refers to a private IP.
 func (m *WestModule) isPrivateAddress(hostname string) bool {
 	// First check if it's an IP address
 	ip := net.ParseIP(hostname)
@@ -453,7 +453,7 @@ func (m *WestModule) isPrivateAddress(hostname string) bool {
 	return false
 }
 
-// passiveDetection performs non-intrusive analysis
+// passiveDetection performs non-intrusive analysis.
 func (m *WestModule) passiveDetection(ctx context.Context, target string) error {
 	// Ensure target has scheme
 	if !strings.HasPrefix(target, "http://") && !strings.HasPrefix(target, "https://") {
@@ -495,7 +495,7 @@ func (m *WestModule) passiveDetection(ctx context.Context, target string) error 
 	return nil
 }
 
-// checkAuthEndpoint checks if an endpoint exists and its auth type
+// checkAuthEndpoint checks if an endpoint exists and its auth type.
 func (m *WestModule) checkAuthEndpoint(ctx context.Context, fullURL string) *AuthEndpoint {
 	// Rate limiting
 	if err := m.rateLimiter.Wait(ctx); err != nil {
@@ -540,7 +540,7 @@ func (m *WestModule) checkAuthEndpoint(ctx context.Context, fullURL string) *Aut
 	return endpoint
 }
 
-// analyzeAuthType determines the authentication type from response
+// analyzeAuthType determines the authentication type from response.
 func (m *WestModule) analyzeAuthType(endpoint *AuthEndpoint, resp *http.Response) {
 	// Check for authentication headers
 	if resp.Header.Get("WWW-Authenticate") != "" {
@@ -586,7 +586,7 @@ func (m *WestModule) analyzeAuthType(endpoint *AuthEndpoint, resp *http.Response
 	}
 }
 
-// activeProbing performs more intrusive tests
+// activeProbing performs more intrusive tests.
 func (m *WestModule) activeProbing(ctx context.Context, _ string) error {
 	// Only probe discovered endpoints
 	m.mu.Lock()
@@ -619,7 +619,7 @@ func (m *WestModule) activeProbing(ctx context.Context, _ string) error {
 	return nil
 }
 
-// testEndpointSecurity tests an endpoint for common vulnerabilities
+// testEndpointSecurity tests an endpoint for common vulnerabilities.
 func (m *WestModule) testEndpointSecurity(ctx context.Context, endpoint *AuthEndpoint) []AuthVulnerability {
 	var vulns []AuthVulnerability
 
@@ -693,7 +693,7 @@ func (m *WestModule) testEndpointSecurity(ctx context.Context, endpoint *AuthEnd
 	return vulns
 }
 
-// testAuthBypass tests for authentication bypass vulnerabilities
+// testAuthBypass tests for authentication bypass vulnerabilities.
 func (m *WestModule) testAuthBypass(ctx context.Context, endpoint *AuthEndpoint, testName string, modifier func(*http.Request)) *AuthVulnerability {
 	// Rate limiting
 	if err := m.rateLimiter.Wait(ctx); err != nil {
@@ -852,7 +852,7 @@ func (m *WestModule) testSessionFixation(ctx context.Context, endpoint *AuthEndp
 	return nil
 }
 
-// patternAnalysis analyzes authentication patterns
+// patternAnalysis analyzes authentication patterns.
 func (m *WestModule) patternAnalysis(ctx context.Context, target string) error {
 	// Analyze session management patterns
 	m.analyzeSessionManagement(ctx, target)
@@ -863,7 +863,7 @@ func (m *WestModule) patternAnalysis(ctx context.Context, target string) error {
 	return nil
 }
 
-// analyzeSessionManagement checks session security
+// analyzeSessionManagement checks session security.
 func (m *WestModule) analyzeSessionManagement(ctx context.Context, target string) {
 	// Ensure target has scheme
 	if !strings.HasPrefix(target, "http://") && !strings.HasPrefix(target, "https://") {
@@ -940,7 +940,7 @@ func (m *WestModule) analyzeSessionManagement(ctx context.Context, target string
 	}
 }
 
-// buildAccessControlMatrix creates a map of resources and required permissions
+// buildAccessControlMatrix creates a map of resources and required permissions.
 func (m *WestModule) buildAccessControlMatrix() {
 	// This is a simplified version - in practice, this would be more comprehensive
 	m.mu.Lock()
@@ -967,7 +967,7 @@ func (m *WestModule) buildAccessControlMatrix() {
 	}
 }
 
-// getResults aggregates all findings
+// getResults aggregates all findings.
 func (m *WestModule) getResults() map[string]interface{} {
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -993,7 +993,7 @@ func (m *WestModule) getResults() map[string]interface{} {
 	}
 }
 
-// generateRecommendations creates actionable security recommendations
+// generateRecommendations creates actionable security recommendations.
 func (m *WestModule) generateRecommendations() map[string][]string {
 	recommendations := map[string][]string{
 		"immediate":  {},
@@ -1044,7 +1044,7 @@ func (m *WestModule) generateRecommendations() map[string][]string {
 	return recommendations
 }
 
-// CircuitBreaker methods
+// CircuitBreaker methods.
 func (cb *CircuitBreaker) Allow() bool {
 	cb.mu.Lock()
 	defer cb.mu.Unlock()
@@ -1090,7 +1090,7 @@ func (cb *CircuitBreaker) RecordFailure() {
 	}
 }
 
-// Helper functions
+// Helper functions.
 func countAuthEndpoints(endpoints []AuthEndpoint) int {
 	count := 0
 	for _, ep := range endpoints {
@@ -1111,7 +1111,7 @@ func countBySeverity(vulns []AuthVulnerability, severity string) int {
 	return count
 }
 
-// Info returns module information
+// Info returns module information.
 func (m *WestModule) Info() *modules.ModuleInfo {
 	return &modules.ModuleInfo{
 		Name:        m.ModuleName,
@@ -1128,7 +1128,7 @@ func (m *WestModule) Info() *modules.ModuleInfo {
 	}
 }
 
-// JSON export methods
+// JSON export methods.
 func (m *WestModule) ExportJSON() ([]byte, error) {
 	results := m.getResults()
 	return json.MarshalIndent(results, "", "  ")

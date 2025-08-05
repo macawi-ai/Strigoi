@@ -55,6 +55,7 @@ type CenterConfig struct {
 	Filters        []string      `json:"filters"`         // Regex filters
 	MaxDuration    time.Duration `json:"max_duration"`    // Maximum monitoring time
 	ShowActivity   bool          `json:"show_activity"`   // Show all stream activity
+	EnableStrace   bool          `json:"enable_strace"`   // Enable strace fallback (opt-in)
 }
 
 // StreamTarget represents a process to monitor.
@@ -160,6 +161,13 @@ func NewCenterModule() modules.Module {
 					Type:        "bool",
 					Default:     false,
 				},
+				"enable-strace": {
+					Name:        "enable-strace",
+					Description: "Enable strace fallback for PTY capture (performance impact)",
+					Required:    false,
+					Type:        "bool",
+					Default:     false,
+				},
 			},
 		},
 		activeStreams: make(map[int]*StreamCapture),
@@ -232,6 +240,13 @@ func (m *CenterModule) Configure() error {
 		}
 	}
 
+	enableStrace := false
+	if es, ok := m.ModuleOptions["enable-strace"]; ok && es.Value != nil {
+		if esBool, ok := es.Value.(bool); ok {
+			enableStrace = esBool
+		}
+	}
+
 	m.config = CenterConfig{
 		CaptureMode:    "auto",
 		PollInterval:   time.Duration(pollInterval) * time.Millisecond,
@@ -241,15 +256,24 @@ func (m *CenterModule) Configure() error {
 		Filters:        filters,
 		MaxDuration:    duration,
 		ShowActivity:   showActivity,
+		EnableStrace:   enableStrace,
 	}
 
 	// Initialize components
 	m.captureEngine = NewCaptureEngine(m.config.CaptureMode)
+	if m.config.EnableStrace {
+		if err := m.captureEngine.EnableStrace(); err != nil {
+			fmt.Printf("Warning: Failed to enable strace: %v\n", err)
+		}
+	}
 	m.vulnDetector = NewVulnerabilityDetector()
 	m.credHunter = NewCredentialHunter()
 
 	// Initialize dissectors
 	m.dissectors = []Dissector{
+		NewHTTPDissector(),
+		NewGRPCDissectorV2(), // Use improved version with better performance and security
+		NewWebSocketDissector(),
 		NewJSONDissector(),
 		NewSQLDissector(),
 		NewPlainTextDissector(),
@@ -548,20 +572,6 @@ func (m *CenterModule) processStreamData(capture *StreamCapture, stream string, 
 	capture.Statistics.EventsCount++
 	capture.Statistics.LastActivity = time.Now()
 
-	// Show activity if enabled
-	if m.config.ShowActivity {
-		// Add to display
-		if m.display != nil {
-			m.display.AddActivity(capture.Target, stream, data)
-		}
-		
-		// Log to JSONL
-		preview := sanitizePreview(data, 50)
-		if err := m.logger.LogActivity(capture.Target, stream, preview, len(data)); err != nil {
-			fmt.Printf("Warning: failed to log activity: %v\n", err)
-		}
-	}
-
 	// Store in buffer
 	switch stream {
 	case "stdin":
@@ -583,6 +593,20 @@ func (m *CenterModule) processStreamData(capture *StreamCapture, stream string, 
 		}
 		if !matched {
 			return
+		}
+	}
+
+	// Show activity if enabled (after filter check)
+	if m.config.ShowActivity {
+		// Add to display
+		if m.display != nil {
+			m.display.AddActivity(capture.Target, stream, data)
+		}
+
+		// Log to JSONL
+		preview := sanitizePreview(data, 50)
+		if err := m.logger.LogActivity(capture.Target, stream, preview, len(data)); err != nil {
+			fmt.Printf("Warning: failed to log activity: %v\n", err)
 		}
 	}
 

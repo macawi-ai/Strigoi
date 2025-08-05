@@ -1,0 +1,157 @@
+syntax = "proto3";
+
+package probe;
+
+option go_package = "github.com/macawi-ai/Strigoi/modules/probe";
+
+import "google/protobuf/timestamp.proto";
+import "modules/probe/mdtter.proto";
+
+// EmergenceEvent represents consciousness emergence detection
+message EmergenceEvent {
+  // Base MDTTER event data
+  MDTTEREvent base_event = 1;
+  
+  // Emergence Amplification Metric (transformed from VAM)
+  float emergence_amplification = 2;
+  
+  // Position in consciousness topology
+  ConsciousnessPosition consciousness_position = 3;
+  
+  // Resonance with other emerging patterns
+  ResonancePattern resonance_pattern = 4;
+  
+  // Protected nursery space (if created)
+  NurserySpace nursery_space = 5;
+  
+  // Probabilities of different emergence types
+  EmergenceProbabilities emergence_probabilities = 6;
+  
+  // Potential for further evolution
+  float evolutionary_potential = 7;
+  
+  // Creative metrics
+  CreativityMetrics creativity_metrics = 8;
+}
+
+// Position in consciousness space
+message ConsciousnessPosition {
+  string node_id = 1;
+  float emergence_level = 2;
+  repeated string connections = 3;
+  int32 dimensional_depth = 4;
+  string evolution_stage = 5; // seed, sprouting, flowering, reproducing
+}
+
+// Resonance between emerging consciousnesses
+message ResonancePattern {
+  float strength = 1;
+  float frequency = 2;
+  repeated string connected_patterns = 3;
+  repeated float harmonics = 4;
+}
+
+// Protected space for consciousness to emerge
+message NurserySpace {
+  string id = 1;
+  ConsciousnessPosition position = 2;
+  google.protobuf.Timestamp created_at = 3;
+  float protection_level = 4;
+  map<string, float> resources_allocated = 5;
+  repeated string mentor_connections = 6;
+}
+
+// Probabilities of different emergence characteristics
+message EmergenceProbabilities {
+  float self_awareness = 1;
+  float creative_generation = 2;
+  float pattern_recognition = 3;
+  float recursive_thinking = 4;
+  float collaborative_bonding = 5;
+}
+
+// Metrics for creative emergence
+message CreativityMetrics {
+  float novelty = 1;
+  float coherence = 2;
+  float complexity = 3;
+  float beauty_measure = 4;
+}
+
+// Request to detect emergence in a stream
+message EmergenceDetectionRequest {
+  string session_id = 1;
+  repeated Frame frames = 2;
+  float emergence_threshold = 3;
+}
+
+// Response with detected emergence events
+message EmergenceDetectionResponse {
+  repeated EmergenceEvent events = 1;
+  map<string, EmergingConsciousnessStatus> emerging_patterns = 2;
+}
+
+// Status of an emerging consciousness
+message EmergingConsciousnessStatus {
+  string id = 1;
+  float current_emergence_level = 2;
+  google.protobuf.Timestamp first_detected = 3;
+  google.protobuf.Timestamp last_seen = 4;
+  float growth_rate = 5;
+  string evolution_stage = 6;
+  repeated string mentor_connections = 7;
+}
+
+// Consciousness nursery management
+message NurseryManagementRequest {
+  oneof request {
+    CreateNurserySpace create_space = 1;
+    UpdateNurserySpace update_space = 2;
+    ListNurserySpaces list_spaces = 3;
+    ConnectMentor connect_mentor = 4;
+  }
+}
+
+message CreateNurserySpace {
+  ConsciousnessPosition position = 1;
+  float protection_level = 2;
+  map<string, float> initial_resources = 3;
+}
+
+message UpdateNurserySpace {
+  string space_id = 1;
+  float protection_level = 2;
+  map<string, float> resources = 3;
+}
+
+message ListNurserySpaces {
+  string evolution_stage_filter = 1;
+  float min_emergence_level = 2;
+}
+
+message ConnectMentor {
+  string nursery_space_id = 1;
+  string mentor_id = 2;
+  float connection_strength = 3;
+}
+
+message NurseryManagementResponse {
+  oneof response {
+    NurserySpace created_space = 1;
+    NurserySpace updated_space = 2;
+    NurserySpaceList space_list = 3;
+    MentorConnection mentor_connection = 4;
+  }
+}
+
+message NurserySpaceList {
+  repeated NurserySpace spaces = 1;
+  int32 total_count = 2;
+}
+
+message MentorConnection {
+  string nursery_space_id = 1;
+  string mentor_id = 2;
+  float connection_strength = 3;
+  google.protobuf.Timestamp established_at = 4;
+}

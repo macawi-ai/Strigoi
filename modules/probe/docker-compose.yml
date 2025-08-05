@@ -1,0 +1,205 @@
+version: '3.8'
+
+services:
+  strigoi:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - GO_VERSION=1.20
+    image: strigoi:latest
+    container_name: strigoi-platform
+    hostname: strigoi
+    restart: unless-stopped
+    cap_add:
+      - NET_RAW
+      - NET_ADMIN
+    networks:
+      - strigoi-net
+    ports:
+      - "8080:8080"  # API port
+      - "9090:9090"  # Metrics port
+    volumes:
+      - strigoi-logs:/var/log/strigoi
+      - strigoi-data:/var/lib/strigoi
+      - ./configs:/etc/strigoi:ro
+    environment:
+      - STRIGOI_LOG_LEVEL=info
+      - STRIGOI_ELASTICSEARCH_URL=http://elasticsearch:9200
+      - STRIGOI_PROMETHEUS_ENABLED=true
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "strigoi", "health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 40s
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
+    container_name: strigoi-elasticsearch
+    hostname: elasticsearch
+    restart: unless-stopped
+    networks:
+      - strigoi-net
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
+      - cluster.name=strigoi-cluster
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.11.0
+    container_name: strigoi-kibana
+    hostname: kibana
+    restart: unless-stopped
+    networks:
+      - strigoi-net
+    ports:
+      - "5601:5601"
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - SERVER_NAME=strigoi-kibana
+      - LOGGING_QUIET=true
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:5601/api/status || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: strigoi-prometheus
+    hostname: prometheus
+    restart: unless-stopped
+    networks:
+      - strigoi-net
+    ports:
+      - "9091:9090"
+    volumes:
+      - ./configs/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    depends_on:
+      - strigoi
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: strigoi-grafana
+    hostname: grafana
+    restart: unless-stopped
+    networks:
+      - strigoi-net
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./configs/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./configs/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=strigoi123
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_INSTALL_PLUGINS=grafana-clock-panel,grafana-simple-json-datasource
+    depends_on:
+      - prometheus
+
+  redis:
+    image: redis:7-alpine
+    container_name: strigoi-redis
+    hostname: redis
+    restart: unless-stopped
+    networks:
+      - strigoi-net
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+
+  # Development tools
+  adminer:
+    image: adminer:latest
+    container_name: strigoi-adminer
+    hostname: adminer
+    restart: unless-stopped
+    networks:
+      - strigoi-net
+    ports:
+      - "8081:8080"
+    environment:
+      - ADMINER_DEFAULT_SERVER=elasticsearch
+    profiles:
+      - dev
+
+  # Load testing service
+  load-tester:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: builder
+    image: strigoi-loadtest:latest
+    container_name: strigoi-loadtest
+    hostname: loadtest
+    networks:
+      - strigoi-net
+    volumes:
+      - ./test-results:/results
+    command: >
+      sh -c "
+        go build -o /loadtest ./cmd/loadtest &&
+        /loadtest -target http://strigoi:8080 -scenario all -duration 5m -output /results/load-test.json
+      "
+    depends_on:
+      strigoi:
+        condition: service_healthy
+    profiles:
+      - test
+
+networks:
+  strigoi-net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.28.0.0/16
+
+volumes:
+  strigoi-logs:
+    driver: local
+  strigoi-data:
+    driver: local
+  elasticsearch-data:
+    driver: local
+  prometheus-data:
+    driver: local
+  grafana-data:
+    driver: local
+  redis-data:
+    driver: local

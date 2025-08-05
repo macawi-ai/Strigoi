@@ -30,7 +30,7 @@ type NorthModule struct {
 	providers    map[string]*AIProvider
 }
 
-// NewNorthModule creates a new probe north module instance
+// NewNorthModule creates a new probe north module instance.
 func NewNorthModule() modules.Module {
 	m := &NorthModule{
 		BaseModule: modules.BaseModule{
@@ -91,7 +91,7 @@ func NewNorthModule() modules.Module {
 	return m
 }
 
-// SetOption sets a module option
+// SetOption sets a module option.
 func (m *NorthModule) SetOption(name, value string) error {
 	switch name {
 	case "target":
@@ -127,7 +127,7 @@ func (m *NorthModule) SetOption(name, value string) error {
 	return nil
 }
 
-// ValidateOptions validates all required options are set
+// ValidateOptions validates all required options are set.
 func (m *NorthModule) ValidateOptions() error {
 	if m.target == "" {
 		return fmt.Errorf("target is required")
@@ -147,7 +147,7 @@ func (m *NorthModule) ValidateOptions() error {
 	return nil
 }
 
-// Run executes the module
+// Run executes the module.
 func (m *NorthModule) Run() (*modules.ModuleResult, error) {
 	if err := m.ValidateOptions(); err != nil {
 		return nil, err
@@ -260,7 +260,7 @@ func (m *NorthModule) Run() (*modules.ModuleResult, error) {
 	return result, nil
 }
 
-// probeEndpoint probes a single endpoint
+// probeEndpoint probes a single endpoint.
 func (m *NorthModule) probeEndpoint(client *http.Client, targetURL, method string) (modules.EndpointInfo, error) {
 	req, err := http.NewRequest(method, targetURL, nil)
 	if err != nil {
@@ -306,7 +306,7 @@ func (m *NorthModule) probeEndpoint(client *http.Client, targetURL, method strin
 	return info, nil
 }
 
-// getEndpointsByPreset returns endpoints based on the selected preset
+// getEndpointsByPreset returns endpoints based on the selected preset.
 func (m *NorthModule) getEndpointsByPreset() []string {
 	switch m.aiPreset {
 	case "comprehensive":
@@ -347,7 +347,7 @@ func (m *NorthModule) getEndpointsByPreset() []string {
 	}
 }
 
-// probeAIEndpoint probes an endpoint and analyzes for AI characteristics
+// probeAIEndpoint probes an endpoint and analyzes for AI characteristics.
 func (m *NorthModule) probeAIEndpoint(client *http.Client, targetURL, method string) (*EndpointResponse, error) {
 	req, err := http.NewRequest(method, targetURL, nil)
 	if err != nil {
@@ -386,7 +386,7 @@ func (m *NorthModule) probeAIEndpoint(client *http.Client, targetURL, method str
 	return response, nil
 }
 
-// analyzeAIResponse analyzes response to identify AI provider and security issues
+// analyzeAIResponse analyzes response to identify AI provider and security issues.
 func (m *NorthModule) analyzeAIResponse(resp *EndpointResponse) {
 	// Skip error responses
 	if resp.StatusCode >= 500 || resp.Error != nil {
@@ -434,7 +434,7 @@ func (m *NorthModule) analyzeAIResponse(resp *EndpointResponse) {
 	}
 }
 
-// probeLocalPorts checks common local model server ports
+// probeLocalPorts checks common local model server ports.
 func (m *NorthModule) probeLocalPorts(client *http.Client) {
 	if !m.includeLocal {
 		return
@@ -472,7 +472,7 @@ func (m *NorthModule) probeLocalPorts(client *http.Client) {
 	}
 }
 
-// analyzeFindings processes discovered endpoints to identify AI services
+// analyzeFindings processes discovered endpoints to identify AI services.
 func (m *NorthModule) analyzeFindings() map[string]interface{} {
 	aiServices := make(map[string]interface{})
 
@@ -512,12 +512,12 @@ func (m *NorthModule) analyzeFindings() map[string]interface{} {
 	return aiServices
 }
 
-// Check validates the module can run
+// Check validates the module can run.
 func (m *NorthModule) Check() bool {
 	return true
 }
 
-// Info returns module information
+// Info returns module information.
 func (m *NorthModule) Info() *modules.ModuleInfo {
 	return &modules.ModuleInfo{
 		Name:        m.Name(),
@@ -532,7 +532,7 @@ func (m *NorthModule) Info() *modules.ModuleInfo {
 	}
 }
 
-// GetDiscoveredEndpoints returns the discovered endpoints
+// GetDiscoveredEndpoints returns the discovered endpoints.
 func (m *NorthModule) GetDiscoveredEndpoints() []modules.EndpointInfo {
 	// Convert EndpointResponse to EndpointInfo
 	endpoints := make([]modules.EndpointInfo, 0, len(m.discovered))
@@ -563,7 +563,7 @@ func (m *NorthModule) GetDiscoveredEndpoints() []modules.EndpointInfo {
 	return endpoints
 }
 
-// ToJSON converts discovered endpoints to JSON
+// ToJSON converts discovered endpoints to JSON.
 func (m *NorthModule) ToJSON() (string, error) {
 	data, err := json.MarshalIndent(m.discovered, "", "  ")
 	if err != nil {
@@ -572,7 +572,7 @@ func (m *NorthModule) ToJSON() (string, error) {
 	return string(data), nil
 }
 
-// ethicalDiscoveryProbe attempts to identify the AI provider using polite, ethical methods
+// ethicalDiscoveryProbe attempts to identify the AI provider using polite, ethical methods.
 func (m *NorthModule) ethicalDiscoveryProbe(client *http.Client) (string, float64) {
 	// Common AI API endpoints that require authentication
 	probeEndpoints := []struct {
@@ -620,7 +620,7 @@ func (m *NorthModule) ethicalDiscoveryProbe(client *http.Client) (string, float6
 	return "", 0.0
 }
 
-// analyzeErrorResponse identifies providers from error responses
+// analyzeErrorResponse identifies providers from error responses.
 func (m *NorthModule) analyzeErrorResponse(statusCode int, headers http.Header, body []byte) (string, float64) {
 	bodyStr := string(body)
 

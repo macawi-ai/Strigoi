@@ -11,7 +11,7 @@ import (
 	"github.com/macawi-ai/strigoi/pkg/security"
 )
 
-// Dependency represents a package dependency
+// Dependency represents a package dependency.
 type Dependency struct {
 	Name       string   `json:"name"`
 	Version    string   `json:"version"`
@@ -21,7 +21,7 @@ type Dependency struct {
 	Repository string   `json:"repository,omitempty"`
 }
 
-// Vulnerability represents a security vulnerability
+// Vulnerability represents a security vulnerability.
 type Vulnerability struct {
 	CVE            string   `json:"cve,omitempty"`
 	CWE            string   `json:"cwe,omitempty"`
@@ -36,7 +36,7 @@ type Vulnerability struct {
 	References     []string `json:"references,omitempty"`
 }
 
-// SupplyChainResult contains dependency analysis results
+// SupplyChainResult contains dependency analysis results.
 type SupplyChainResult struct {
 	PackageManager  string             `json:"package_manager"`
 	ManifestFile    string             `json:"manifest_file"`
@@ -48,7 +48,7 @@ type SupplyChainResult struct {
 	MCPTools        []security.MCPTool `json:"mcp_tools,omitempty"`
 }
 
-// Summary provides high-level statistics
+// Summary provides high-level statistics.
 type Summary struct {
 	TotalDependencies      int            `json:"total_dependencies"`
 	DirectDependencies     int            `json:"direct_dependencies"`
@@ -58,7 +58,7 @@ type Summary struct {
 	UpdatesAvailable       int            `json:"updates_available,omitempty"`
 }
 
-// VulnSummary categorizes vulnerabilities by severity
+// VulnSummary categorizes vulnerabilities by severity.
 type VulnSummary struct {
 	Critical int `json:"critical"`
 	High     int `json:"high"`
@@ -66,7 +66,7 @@ type VulnSummary struct {
 	Low      int `json:"low"`
 }
 
-// LicenseSummary categorizes licenses by type
+// LicenseSummary categorizes licenses by type.
 type LicenseSummary struct {
 	Permissive int `json:"permissive"`
 	Copyleft   int `json:"copyleft"`
@@ -74,13 +74,13 @@ type LicenseSummary struct {
 	Unknown    int `json:"unknown"`
 }
 
-// DependencyGraph represents the dependency tree
+// DependencyGraph represents the dependency tree.
 type DependencyGraph struct {
 	Nodes []GraphNode `json:"nodes"`
 	Edges []GraphEdge `json:"edges"`
 }
 
-// GraphNode represents a dependency in the graph
+// GraphNode represents a dependency in the graph.
 type GraphNode struct {
 	ID      string `json:"id"`
 	Name    string `json:"name"`
@@ -88,14 +88,14 @@ type GraphNode struct {
 	Type    string `json:"type"`
 }
 
-// GraphEdge represents a dependency relationship
+// GraphEdge represents a dependency relationship.
 type GraphEdge struct {
 	From string `json:"from"`
 	To   string `json:"to"`
 	Type string `json:"type"`
 }
 
-// DataFlowResult contains data flow analysis results
+// DataFlowResult contains data flow analysis results.
 type DataFlowResult struct {
 	Summary          DataFlowSummary   `json:"summary"`
 	Findings         []Finding         `json:"findings"`
@@ -103,7 +103,7 @@ type DataFlowResult struct {
 	ExternalServices []ExternalService `json:"external_services"`
 }
 
-// DataFlowSummary provides high-level statistics
+// DataFlowSummary provides high-level statistics.
 type DataFlowSummary struct {
 	ExternalServices int `json:"external_services"`
 	PotentialSecrets int `json:"potential_secrets"`
@@ -111,7 +111,7 @@ type DataFlowSummary struct {
 	LeakPoints       int `json:"leak_points"`
 }
 
-// Finding represents a security finding
+// Finding represents a security finding.
 type Finding struct {
 	Type        string   `json:"type"`
 	Category    string   `json:"category"`
@@ -125,7 +125,7 @@ type Finding struct {
 	References  []string `json:"references,omitempty"`
 }
 
-// DataFlow represents how data moves through the system
+// DataFlow represents how data moves through the system.
 type DataFlow struct {
 	ID              string   `json:"id"`
 	Source          string   `json:"source"`
@@ -135,7 +135,7 @@ type DataFlow struct {
 	Protection      []string `json:"protection,omitempty"`
 }
 
-// ExternalService represents an external API or service
+// ExternalService represents an external API or service.
 type ExternalService struct {
 	Domain         string   `json:"domain"`
 	Purpose        string   `json:"purpose"`
@@ -144,14 +144,14 @@ type ExternalService struct {
 	Encrypted      bool     `json:"encrypted"`
 }
 
-// SecureExecutor provides safe command execution
+// SecureExecutor provides safe command execution.
 type SecureExecutor struct {
 	allowedPaths []string
 	timeout      time.Duration
 	maxOutput    int64
 }
 
-// NewSecureExecutor creates a secure executor with defaults
+// NewSecureExecutor creates a secure executor with defaults.
 func NewSecureExecutor() *SecureExecutor {
 	// Get working directory
 	wd, _ := os.Getwd()
@@ -167,7 +167,7 @@ func NewSecureExecutor() *SecureExecutor {
 	}
 }
 
-// ValidatePath ensures a path is within allowed directories
+// ValidatePath ensures a path is within allowed directories.
 func (s *SecureExecutor) ValidatePath(path string) error {
 	// Clean and resolve the path
 	cleaned := filepath.Clean(path)
@@ -215,7 +215,7 @@ func (s *SecureExecutor) ValidatePath(path string) error {
 	return nil
 }
 
-// CommandExists checks if a command is available
+// CommandExists checks if a command is available.
 func (s *SecureExecutor) CommandExists(cmd string) bool {
 	// Only check for known safe commands
 	allowedCommands := []string{
@@ -241,7 +241,7 @@ func (s *SecureExecutor) CommandExists(cmd string) bool {
 	return err == nil
 }
 
-// AddAllowedPath adds a path to the whitelist
+// AddAllowedPath adds a path to the whitelist.
 func (s *SecureExecutor) AddAllowedPath(path string) error {
 	abs, err := filepath.Abs(path)
 	if err != nil {
@@ -257,7 +257,7 @@ func (s *SecureExecutor) AddAllowedPath(path string) error {
 	return nil
 }
 
-// Pattern represents a detection pattern
+// Pattern represents a detection pattern.
 type Pattern struct {
 	Name       string
 	Regex      string
@@ -265,7 +265,7 @@ type Pattern struct {
 	Category   string
 }
 
-// Common patterns for secret detection
+// Common patterns for secret detection.
 var SecretPatterns = []Pattern{
 	{
 		Name:       "AWS Access Key",

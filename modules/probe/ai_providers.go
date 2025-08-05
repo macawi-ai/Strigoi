@@ -289,7 +289,7 @@ func GetAIEndpoints() []string {
 	}
 }
 
-// GetLocalModelPorts returns common ports for local model servers
+// GetLocalModelPorts returns common ports for local model servers.
 func GetLocalModelPorts() []int {
 	return []int{
 		11434, // Ollama default
