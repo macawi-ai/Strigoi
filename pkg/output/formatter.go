@@ -61,8 +61,21 @@ func CreateSeverityFilter(severities []string) (FilterFunc, error) {
 		return nil, nil
 	}
 
-	severityMap := make(map[Severity]bool)
+	// Filter out empty strings that might come from flag resets
+	validSeverities := []string{}
 	for _, s := range severities {
+		if strings.TrimSpace(s) != "" {
+			validSeverities = append(validSeverities, s)
+		}
+	}
+
+	// If no valid severities after filtering, return nil
+	if len(validSeverities) == 0 {
+		return nil, nil
+	}
+
+	severityMap := make(map[Severity]bool)
+	for _, s := range validSeverities {
 		sev, err := ParseSeverity(s)
 		if err != nil {
 			return nil, err
@@ -77,6 +90,12 @@ func CreateSeverityFilter(severities []string) (FilterFunc, error) {
 
 // ParseSeverity parses a string into a Severity.
 func ParseSeverity(s string) (Severity, error) {
+	// Handle empty strings and malformed values that might come from flag resets
+	s = strings.TrimSpace(s)
+	if s == "" || s == "[]" || s == "nil" {
+		return SeverityInfo, nil
+	}
+
 	switch strings.ToLower(s) {
 	case "critical", "crit", "c":
 		return SeverityCritical, nil

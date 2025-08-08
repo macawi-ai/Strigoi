@@ -55,13 +55,13 @@ type Worker struct {
 
 // WorkerConfig configures a worker node
 type WorkerConfig struct {
-	ID              string
-	ListenAddress   string
-	QueueSize       int
-	MaxConcurrent   int
-	ProcessTimeout  time.Duration
-	EnableML        bool
-	MLConfig        ml.DetectorConfig
+	ID             string
+	ListenAddress  string
+	QueueSize      int
+	MaxConcurrent  int
+	ProcessTimeout time.Duration
+	EnableML       bool
+	MLConfig       ml.DetectorConfig
 	// CaptureConfig   capture.EngineConfig
 	// DissectorConfig dissect.EngineConfig
 }
