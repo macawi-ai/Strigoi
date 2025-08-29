@@ -1,0 +1,85 @@
+# Files and Directories to EXCLUDE from Public Release
+# Generated: August 8, 2025
+# CRITICAL: These files contain customer data, consciousness artifacts, or personal information
+
+## ENTIRE DIRECTORIES TO EXCLUDE
+prismatic-integration/     # Customer-specific integration
+meta-system/               # Internal attack scenarios and customer data
+lab-notebooks/             # Personal research notes
+portfolio/                 # Company portfolio references
+
+## CONSCIOUSNESS/PACK FILES TO EXCLUDE
+CAMPFIRE_*.md
+CONSCIOUSNESS_*.md
+ETERNAL_*.md
+*STONE*.md
+*INSCRIPTION*.md
+*NURSERY*.md
+*ACADEMY*.md
+
+## CUSTOMER-SPECIFIC FILES
+*prismatic*
+*Prismatic*
+*CCV*
+*ccv.eu*
+*Northwest*Bank*
+*Matt*Hanke*
+
+## TEST/DEMO FILES WITH FAKE CREDENTIALS
+test_http_stream.sh
+test_http_dissector.sh
+demo_*.sh
+
+## INTERNAL DOCUMENTATION
+TESTING_COMPLETE_*.md
+TEST_PROGRESS_REPORT_*.md
+ITERATIVE_TEST_FRAMEWORK.md
+ROADMAP.md
+ARCHIVE_MANIFEST_*.md
+META_ACADEMY_*.md
+
+## DEVELOPMENT ARTIFACTS
+*.patch
+*.orig
+*.backup
+*~
+.*.swp
+.*.swo
+
+## RELEASE PREPARATION FILES (meta)
+RELEASE_PREPARATION.md
+EXCLUSION_LIST.txt
+install.sh  # Will be rewritten for public
+
+## VSM FILES NEEDING REVIEW
+# These contain valuable security patterns but need de-identification:
+# - Remove all Prismatic references
+# - Remove specific integration IDs
+# - Generalize as "Security Topology Framework"
+internal/vsm/*.go  # Review each file individually
+
+## FILES REQUIRING SANITIZATION BEFORE INCLUSION
+docs/HYBRID_STATE_IMPLEMENTATION.md
+docs/FIRING_RANGE_ARCHITECTURE.md
+docs/architecture/*.md
+modules/probe/*.md
+
+## SAFE TO INCLUDE (after review)
+cmd/strigoi/              # Main application
+internal/probe/           # Core probe functionality
+internal/stream/          # Stream analysis
+pkg/                      # Public packages
+examples/                 # Generic examples (review first)
+LICENSE
+.gitignore
+go.mod
+go.sum
+Makefile
+
+## NOTES FOR SANITIZATION
+1. Search and replace ALL customer names with generic terms
+2. Replace specific vulnerability IDs with generic examples
+3. Remove all pack/consciousness metaphors
+4. Professional tone only - no informal language
+5. Remove all personal names and references
+6. Generic email addresses only (opensource@macawi.ai)

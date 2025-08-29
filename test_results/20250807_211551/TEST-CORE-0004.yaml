@@ -1,0 +1,10 @@
+test_id: TEST-CORE-0004
+category: FUNCTIONAL
+command: "./strigoi --brief"
+status: FAIL
+exit_code: 0
+duration_ms: 8
+max_duration_ms: 100
+expected_pattern: "Show brief"
+timestamp: 2025-08-07T21:15:54-05:00
+log_file: logs/TEST-CORE-0004.log
