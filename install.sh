@@ -226,23 +226,62 @@ print_completion() {
 # Main installation flow
 main() {
     print_banner
-    
-    # Allow custom installation directory
-    if [ "$1" == "--prefix" ] && [ -n "$2" ]; then
-        INSTALL_DIR="$2"
+
+    local auto_confirm=false
+    local custom_prefix=""
+
+    # Parse arguments
+    while [[ $# -gt 0 ]]; do
+        case $1 in
+            --prefix)
+                custom_prefix="$2"
+                shift 2
+                ;;
+            --yes|-y)
+                auto_confirm=true
+                shift
+                ;;
+            --help|-h)
+                echo "Strigoi Installation Script"
+                echo ""
+                echo "Usage: $0 [options]"
+                echo ""
+                echo "Options:"
+                echo "  --prefix DIR    Install to custom directory (default: ~/strigoi)"
+                echo "  --yes, -y      Skip confirmation prompt"
+                echo "  --help, -h     Show this help message"
+                echo ""
+                exit 0
+                ;;
+            *)
+                print_error "Unknown option: $1"
+                print_info "Use --help for usage information"
+                exit 1
+                ;;
+        esac
+    done
+
+    # Set installation directory
+    if [ -n "$custom_prefix" ]; then
+        INSTALL_DIR="$custom_prefix"
         print_info "Custom installation directory: $INSTALL_DIR"
     else
         print_info "Installing to: $INSTALL_DIR"
         print_info "(Set STRIGOI_HOME or use --prefix to customize)"
     fi
-    
-    echo ""
-    read -p "Continue with installation? (Y/n) " -n 1 -r
-    echo ""
-    
-    if [[ ! $REPLY =~ ^[Yy]$ ]] && [ -n "$REPLY" ]; then
-        print_error "Installation cancelled"
-        exit 1
+
+    # Confirmation prompt (unless --yes flag is used)
+    if [ "$auto_confirm" = false ]; then
+        echo ""
+        read -p "Continue with installation? (Y/n) " -n 1 -r
+        echo ""
+
+        if [[ ! $REPLY =~ ^[Yy]$ ]] && [ -n "$REPLY" ]; then
+            print_error "Installation cancelled"
+            exit 1
+        fi
+    else
+        print_info "Auto-confirming installation..."
     fi
     
     check_dependencies
