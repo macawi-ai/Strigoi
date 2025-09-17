@@ -279,13 +279,17 @@ strigoi probe all
 
 # JSON for automation
 strigoi probe all --output json
-
-# YAML format
-strigoi probe all --output yaml
-
-# Markdown for reports
-strigoi probe all --output markdown
 ```
+
+**Available Formats:**
+- **pretty** (default): Human-readable colored output
+- **json**: Structured JSON for automation and processing
+
+**Expanding Output Formats:**
+Missing a format you need? Strigoi is designed to be extensible!
+- **YAML** and **Markdown** formatters are planned features
+- Check the [contribution guide](docs/DEVELOPMENT_METHODOLOGY.md) to add new formats
+- Output formatters are located in `pkg/output/` - easy to extend!
 
 ## 🎓 Next Steps
 
