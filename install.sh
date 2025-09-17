@@ -16,7 +16,7 @@ NC='\033[0m' # No Color
 
 # Configuration
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-DEFAULT_INSTALL_DIR="$HOME/.strigoi"
+DEFAULT_INSTALL_DIR="$HOME/strigoi"
 INSTALL_DIR="${STRIGOI_HOME:-$DEFAULT_INSTALL_DIR}"
 BINARY_NAME="strigoi"
 

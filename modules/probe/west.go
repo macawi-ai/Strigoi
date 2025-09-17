@@ -8,6 +8,7 @@ import (
 	"net"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -224,8 +225,13 @@ func (m *WestModule) Configure() error {
 
 	allowPrivate := false
 	if ap, ok := m.ModuleOptions["allow_private"]; ok && ap.Value != nil {
-		if apBool, ok := ap.Value.(bool); ok {
-			allowPrivate = apBool
+		switch v := ap.Value.(type) {
+		case bool:
+			allowPrivate = v
+		case string:
+			if parsed, err := strconv.ParseBool(v); err == nil {
+				allowPrivate = parsed
+			}
 		}
 	} else if ap, ok := m.ModuleOptions["allow_private"]; ok && ap.Default != nil {
 		if apBool, ok := ap.Default.(bool); ok {

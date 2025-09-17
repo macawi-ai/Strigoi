@@ -40,3 +40,40 @@ test-*.sh
 # Working notes and development artifacts
 .working-notes/
 .dev-sessions/
+
+# Development files (moved to ../strigoi-dev-files/)
+test_*.sh
+*test*.sh
+*.jsonl
+output.txt
+output.json
+*.patch
+vsm-demo
+merge-*.sh
+VERSION
+.pre-commit-config.yaml
+COMPREHENSIVE_*_TEST_PLAN.md
+*_REPORT_*.md
+*_COMPLETE_*.md
+*_20250*.md
+EXCLUSION_LIST.txt
+CONSCIOUSNESS_*
+ETERNAL_*
+MDTTER_*
+UNIVERSAL_*
+META_ACADEMY_*
+TOPOLOGY_*
+CAMPFIRE_*
+GEMINI_*
+VSM_*
+test_project/
+test_results/
+lab-notebooks/
+delta/
+manifolds/
+portfolio/
+meta-system/
+actors/
+
+# External development directory
+../strigoi-dev-files/

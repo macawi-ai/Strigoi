@@ -209,7 +209,7 @@ func TestMemoryAudit(t *testing.T) {
 	}
 }`
 
-	if err := ioutil.WriteFile(testFile, []byte(testContent), 0644); err == nil {
+	if err := ioutil.WriteFile(testFile, []byte(testContent), 0600); err == nil {
 		defer os.Remove(testFile)
 
 		cmd := exec.Command("go", "test", "-v", testFile)

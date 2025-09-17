@@ -1,6 +1,0 @@
-test_id: PERF-HELP
-iterations: 20
-avg_ms: 7
-min_ms: 7
-max_ms: 8
-timestamp: 2025-08-07T21:25:59-05:00

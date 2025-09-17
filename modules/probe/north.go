@@ -6,6 +6,8 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -133,6 +135,13 @@ func (m *NorthModule) ValidateOptions() error {
 		return fmt.Errorf("target is required")
 	}
 
+	// Check if target is a directory (for local AI config scanning)
+	if m.target == "." || strings.HasPrefix(m.target, "/") || strings.HasPrefix(m.target, "./") {
+		// Directory target - we'll do local AI discovery
+		return nil
+	}
+
+	// Otherwise, treat as URL
 	// Ensure target has a scheme
 	if !strings.HasPrefix(m.target, "http://") && !strings.HasPrefix(m.target, "https://") {
 		m.target = "https://" + m.target
@@ -158,6 +167,11 @@ func (m *NorthModule) Run() (*modules.ModuleResult, error) {
 		StartTime: time.Now(),
 		Status:    "running",
 		Data:      make(map[string]interface{}),
+	}
+
+	// Check if target is a directory for local AI config scanning
+	if m.target == "." || strings.HasPrefix(m.target, "/") || strings.HasPrefix(m.target, "./") {
+		return m.scanDirectoryForAIConfigs(result)
 	}
 
 	// Create HTTP client with timeout
@@ -256,6 +270,161 @@ func (m *NorthModule) Run() (*modules.ModuleResult, error) {
 	result.Data["total_endpoints"] = len(endpointInfos)
 	result.Data["ai_services"] = aiServicesFound
 	result.Data["target"] = m.target
+
+	return result, nil
+}
+
+// scanDirectoryForAIConfigs scans a directory for AI service configurations
+func (m *NorthModule) scanDirectoryForAIConfigs(result *modules.ModuleResult) (*modules.ModuleResult, error) {
+	discoveredConfigs := []map[string]interface{}{}
+	aiServicesFound := make(map[string]bool)
+
+	// Convert relative path to absolute
+	targetDir := m.target
+	if targetDir == "." {
+		if cwd, err := os.Getwd(); err == nil {
+			targetDir = cwd
+		}
+	}
+
+	// 1. Check environment variables
+	aiEnvVars := []string{
+		"OPENAI_API_KEY",
+		"ANTHROPIC_API_KEY",
+		"TOGETHER_API_KEY",
+		"COHERE_API_KEY",
+		"REPLICATE_API_TOKEN",
+		"HUGGINGFACE_API_KEY",
+		"GEMINI_API_KEY",
+		"AZURE_OPENAI_KEY",
+		"CLAUDE_API_KEY",
+		"DEEPSEEK_API_KEY",
+	}
+
+	for _, envVar := range aiEnvVars {
+		if value := os.Getenv(envVar); value != "" {
+			provider := strings.ToLower(strings.Split(envVar, "_")[0])
+			aiServicesFound[provider] = true
+			discoveredConfigs = append(discoveredConfigs, map[string]interface{}{
+				"type":     "environment",
+				"provider": provider,
+				"variable": envVar,
+				"status":   "configured",
+			})
+		}
+	}
+
+	// 2. Scan for configuration files
+	configPatterns := []string{
+		".env",
+		"*.env",
+		"config.json",
+		"config.yaml",
+		"config.yml",
+		"settings.json",
+		"settings.yaml",
+		"claude_desktop_config.json",
+	}
+
+	for _, pattern := range configPatterns {
+		matches, _ := filepath.Glob(filepath.Join(targetDir, pattern))
+		for _, match := range matches {
+			// Read file and look for AI-related configurations
+			if content, err := os.ReadFile(match); err == nil {
+				contentStr := string(content)
+
+				// Check for AI service mentions
+				aiKeywords := []string{
+					"openai", "anthropic", "claude", "gpt",
+					"cohere", "replicate", "huggingface",
+					"gemini", "together", "deepseek",
+					"api_key", "api-key", "apikey",
+				}
+
+				for _, keyword := range aiKeywords {
+					if strings.Contains(strings.ToLower(contentStr), keyword) {
+						relPath, _ := filepath.Rel(targetDir, match)
+						discoveredConfigs = append(discoveredConfigs, map[string]interface{}{
+							"type":     "config_file",
+							"file":     relPath,
+							"keyword":  keyword,
+							"status":   "found",
+						})
+
+						// Extract provider name
+						if strings.Contains(keyword, "openai") {
+							aiServicesFound["openai"] = true
+						} else if strings.Contains(keyword, "anthropic") || strings.Contains(keyword, "claude") {
+							aiServicesFound["anthropic"] = true
+						} else if strings.Contains(keyword, "gemini") {
+							aiServicesFound["google"] = true
+						}
+						break
+					}
+				}
+			}
+		}
+	}
+
+	// 3. Check for MCP server configurations
+	homeDir, _ := os.UserHomeDir()
+	mcpConfigPath := filepath.Join(homeDir, ".config", "claude", "claude_desktop_config.json")
+	if _, err := os.Stat(mcpConfigPath); err == nil {
+		discoveredConfigs = append(discoveredConfigs, map[string]interface{}{
+			"type":   "mcp_config",
+			"file":   mcpConfigPath,
+			"status": "found",
+		})
+		aiServicesFound["mcp_servers"] = true
+	}
+
+	// 4. Scan for localhost AI services
+	if m.includeLocal {
+		// Check common local AI ports
+		localPorts := map[int]string{
+			11434: "ollama",
+			8000:  "fastapi/local-model",
+			8080:  "local-api",
+			5000:  "flask/local-model",
+			3000:  "node/local-api",
+			8765:  "text-generation-webui",
+			7860:  "gradio",
+		}
+
+		for port, service := range localPorts {
+			url := fmt.Sprintf("http://localhost:%d/health", port)
+			client := &http.Client{Timeout: 2 * time.Second}
+			if resp, err := client.Get(url); err == nil {
+				resp.Body.Close()
+				if resp.StatusCode < 500 {
+					discoveredConfigs = append(discoveredConfigs, map[string]interface{}{
+						"type":     "local_service",
+						"service":  service,
+						"port":     port,
+						"status":   "running",
+					})
+					aiServicesFound["local"] = true
+				}
+			}
+		}
+	}
+
+	// Build result
+	result.Status = "completed"
+	result.EndTime = time.Now()
+	result.Data["discovered"] = discoveredConfigs
+	result.Data["total_configs"] = len(discoveredConfigs)
+	result.Data["ai_services"] = aiServicesFound
+	result.Data["target_directory"] = targetDir
+	result.Data["scan_type"] = "directory"
+
+	// Add summary
+	if len(discoveredConfigs) == 0 {
+		result.Data["summary"] = "No AI service configurations detected. Specify a URL target for remote API scanning."
+	} else {
+		result.Data["summary"] = fmt.Sprintf("Found %d AI configuration(s) across %d service(s)",
+			len(discoveredConfigs), len(aiServicesFound))
+	}
 
 	return result, nil
 }

@@ -1,6 +1,0 @@
-test_id: PERF-STARTUP
-iterations: 20
-avg_ms: 8
-min_ms: 7
-max_ms: 13
-timestamp: 2025-08-07T21:16:11-05:00
