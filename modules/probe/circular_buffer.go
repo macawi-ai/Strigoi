@@ -137,7 +137,11 @@ func (cb *CircularBuffer) Len() int {
 func (cb *CircularBuffer) Clear() {
 	cb.mu.Lock()
 	defer cb.mu.Unlock()
+	cb.clearInternal()
+}
 
+// clearInternal empties the buffer without acquiring mutex (for internal use).
+func (cb *CircularBuffer) clearInternal() {
 	cb.head = 0
 	cb.tail = 0
 	cb.count = 0
@@ -148,7 +152,7 @@ func (cb *CircularBuffer) Clear() {
 func (cb *CircularBuffer) makeSpace(needed int) {
 	if needed > cb.size {
 		// Can't fit even if empty
-		cb.Clear()
+		cb.clearInternal()
 		return
 	}
 
