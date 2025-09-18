@@ -1,4 +1,4 @@
-package security_audit
+package securityaudit
 
 import (
 	"bytes"
@@ -116,7 +116,8 @@ func (s *MemoryScanner) scanMemoryIssues(content, filename string) []SecurityIss
 
 		// Check for nil pointer dereferences
 		if strings.Contains(line, "if") && strings.Contains(line, "!= nil") {
-			// Good - checking for nil
+			// Good - checking for nil (positive security pattern)
+			// nolint:revive // intentional empty block for positive pattern recognition
 		} else if s.patterns["null_deref"].MatchString(line) &&
 			!strings.Contains(line, ":=") &&
 			!strings.Contains(line, "=") {

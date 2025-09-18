@@ -2,6 +2,7 @@ package probe
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"sync"
@@ -268,6 +269,7 @@ func (e *CaptureEngineV2) readStreamToBuffer(file *os.File, buffer *LockFreeCirc
 			if _, writeErr := buffer.Write(chunk[:n]); writeErr != nil {
 				// Buffer full or other error, but we still read the data
 				// The buffer will handle backpressure appropriately
+				log.Printf("Buffer write error (continuing): %v", writeErr)
 			}
 
 			*lastOffset += int64(n)

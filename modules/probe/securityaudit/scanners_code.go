@@ -1,4 +1,4 @@
-package security_audit
+package securityaudit
 
 import (
 	"bufio"
@@ -6,7 +6,6 @@ import (
 	"go/ast"
 	"go/parser"
 	"go/token"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -60,7 +59,7 @@ func (s *CodeScanner) Scan(path string, config AuditConfig) ([]SecurityIssue, er
 }
 
 func (s *CodeScanner) scanFile(filename string) ([]SecurityIssue, error) {
-	content, err := ioutil.ReadFile(filename)
+	content, err := os.ReadFile(filename)
 	if err != nil {
 		return nil, err
 	}
@@ -234,7 +233,7 @@ func (s *InjectionScanner) Scan(path string, config AuditConfig) ([]SecurityIssu
 			return nil
 		}
 
-		content, err := ioutil.ReadFile(file)
+		content, err := os.ReadFile(file)
 		if err != nil {
 			return nil
 		}
@@ -361,7 +360,7 @@ func (s *CryptoScanner) Scan(path string, config AuditConfig) ([]SecurityIssue, 
 			return nil
 		}
 
-		content, err := ioutil.ReadFile(file)
+		content, err := os.ReadFile(file)
 		if err != nil {
 			return nil
 		}
@@ -466,7 +465,7 @@ func (s *AuthScanner) Scan(path string, config AuditConfig) ([]SecurityIssue, er
 			return nil
 		}
 
-		content, err := ioutil.ReadFile(file)
+		content, err := os.ReadFile(file)
 		if err != nil {
 			return nil
 		}

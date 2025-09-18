@@ -6,7 +6,7 @@ import (
 )
 
 // NewFormatter creates a formatter based on the specified format.
-func NewFormatter(format OutputFormat) (Formatter, error) {
+func NewFormatter(format Format) (Formatter, error) {
 	switch format {
 	case FormatPretty:
 		return NewPrettyFormatter(), nil
@@ -23,8 +23,8 @@ func NewFormatter(format OutputFormat) (Formatter, error) {
 	}
 }
 
-// ParseOutputFormat parses a string into an OutputFormat.
-func ParseOutputFormat(s string) (OutputFormat, error) {
+// ParseFormat parses a string into an Format.
+func ParseFormat(s string) (Format, error) {
 	switch strings.ToLower(s) {
 	case "pretty":
 		return FormatPretty, nil
@@ -115,7 +115,7 @@ func ParseSeverity(s string) (Severity, error) {
 // FormatOutput is a convenience function that formats output using the specified options.
 func FormatOutput(output StandardOutput, format string, verbosity string, noColor bool, severityFilter []string) (string, error) {
 	// Parse format
-	outputFormat, err := ParseOutputFormat(format)
+	outputFormat, err := ParseFormat(format)
 	if err != nil {
 		return "", err
 	}

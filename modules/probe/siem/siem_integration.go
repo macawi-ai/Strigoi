@@ -9,8 +9,8 @@ import (
 	"github.com/macawi-ai/strigoi/modules/probe"
 )
 
-// SIEMIntegration defines the interface for SIEM systems
-type SIEMIntegration interface {
+// Integration defines the interface for SIEM systems
+type Integration interface {
 	// Initialize sets up the connection to the SIEM
 	Initialize(config Config) error
 
@@ -499,7 +499,7 @@ func (c *EventConverter) calculateCVSS(vuln *probe.Vulnerability) float64 {
 
 // BatchProcessor handles batching of events for efficient sending
 type BatchProcessor struct {
-	integration SIEMIntegration
+	integration Integration
 	config      Config
 	eventChan   chan *SecurityEvent
 	ctx         context.Context
@@ -507,7 +507,7 @@ type BatchProcessor struct {
 }
 
 // NewBatchProcessor creates a new batch processor
-func NewBatchProcessor(integration SIEMIntegration, config Config) *BatchProcessor {
+func NewBatchProcessor(integration Integration, config Config) *BatchProcessor {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	bp := &BatchProcessor{

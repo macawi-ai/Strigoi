@@ -183,7 +183,7 @@ func (m *Manager) Load(name string, opts LoadOptions) (*Session, error) {
 }
 
 // List returns information about all stored sessions.
-func (m *Manager) List() ([]SessionInfo, error) {
+func (m *Manager) List() ([]Info, error) {
 	return m.storage.List()
 }
 
@@ -206,8 +206,8 @@ func (m *Manager) Import(inputPath string, name string, overwrite bool) error {
 }
 
 // Info returns detailed information about a session.
-func (m *Manager) Info(name string) (*SessionInfo, error) {
-	return m.storage.LoadSessionInfo(name)
+func (m *Manager) Info(name string) (*Info, error) {
+	return m.storage.LoadInfo(name)
 }
 
 // LoadIntoModule loads a session configuration into a module.

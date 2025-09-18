@@ -4,14 +4,14 @@ import (
 	"time"
 )
 
-// OutputFormat represents the format for output display.
-type OutputFormat string
+// Format represents the format for output display.
+type Format string
 
 const (
-	FormatPretty   OutputFormat = "pretty"
-	FormatJSON     OutputFormat = "json"
-	FormatYAML     OutputFormat = "yaml"
-	FormatMarkdown OutputFormat = "markdown"
+	FormatPretty   Format = "pretty"
+	FormatJSON     Format = "json"
+	FormatYAML     Format = "yaml"
+	FormatMarkdown Format = "markdown"
 )
 
 // VerbosityLevel controls the amount of detail in output.
@@ -90,7 +90,7 @@ type Error struct {
 
 // FormatterOptions configures output formatting behavior.
 type FormatterOptions struct {
-	Format      OutputFormat
+	Format      Format
 	Verbosity   VerbosityLevel
 	ColorScheme *ColorScheme
 	NoColor     bool

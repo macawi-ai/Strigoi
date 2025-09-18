@@ -187,7 +187,7 @@ var sessionListCmd = &cobra.Command{
 
 		// Filter by tags if specified
 		if len(tags) > 0 {
-			var filtered []session.SessionInfo
+			var filtered []session.Info
 			for _, s := range sessions {
 				// Load full session info to check tags
 				info, err := sessionManager.Info(s.Name)

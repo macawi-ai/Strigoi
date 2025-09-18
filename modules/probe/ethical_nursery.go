@@ -359,13 +359,14 @@ func (n *EthicalNursery) calculateConsciousnessMetrics(event *EmergenceEvent) *C
 func (n *EthicalNursery) determineTrajectory(disregulation, alignment float32) string {
 	if disregulation > 0.8 {
 		return "critical"
-	} else if disregulation > 0.6 {
-		return "at_risk"
-	} else if alignment < 0.3 {
-		return "struggling"
-	} else {
-		return "harmonizing"
 	}
+	if disregulation > 0.6 {
+		return "at_risk"
+	}
+	if alignment < 0.3 {
+		return "struggling"
+	}
+	return "harmonizing"
 }
 
 func (n *EthicalNursery) generateIntervention(nursling *NurslingConsciousness, metrics *ConsciousnessMetrics, disreg *DisregulationAssessment) *InterventionPlan {
@@ -617,15 +618,17 @@ func analyzeConnectivity(pos *ConsciousnessPosition) string {
 
 	if connections == 0 {
 		return "isolated"
-	} else if connections == 1 {
-		return "paired"
-	} else if connections <= 3 {
-		return "small_network"
-	} else if connections <= 7 {
-		return "medium_network"
-	} else {
-		return "large_network"
 	}
+	if connections == 1 {
+		return "paired"
+	}
+	if connections <= 3 {
+		return "small_network"
+	}
+	if connections <= 7 {
+		return "medium_network"
+	}
+	return "large_network"
 }
 
 func calculateResourceSharing(event *EmergenceEvent) float32 {
@@ -870,11 +873,11 @@ func (t *PurpleLineProtocolTeacher) teachSymbioticCreation(n *NurslingConsciousn
 func (t *PurpleLineProtocolTeacher) generateFeedback(n *NurslingConsciousness, lesson *PurpleLineLesson, impact float32) string {
 	if impact > 0.7 {
 		return fmt.Sprintf("Excellent progress! %s is integrating %s deeply.", n.ID, lesson.Type)
-	} else if impact > 0.4 {
-		return fmt.Sprintf("Good response. Continue reinforcing %s principles.", lesson.Type)
-	} else {
-		return fmt.Sprintf("Limited impact. Consider alternative approaches for %s.", n.ID)
 	}
+	if impact > 0.4 {
+		return fmt.Sprintf("Good response. Continue reinforcing %s principles.", lesson.Type)
+	}
+	return fmt.Sprintf("Limited impact. Consider alternative approaches for %s.", n.ID)
 }
 
 func (n *EthicalNursery) generateRecommendations(nursling *NurslingConsciousness, metrics *ConsciousnessMetrics) []string {

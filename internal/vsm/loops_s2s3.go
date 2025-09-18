@@ -9,16 +9,16 @@ import (
 // S2S3Loops implements coordination control feedback loops
 type S2S3Loops struct {
 	manager *LoopManager
-	
+
 	// Control metrics
-	policyViolations   atomic.Value // int
-	auditGaps          atomic.Value // int
-	configDrift        atomic.Value // float64 (deviation %)
+	policyViolations     atomic.Value // int
+	auditGaps            atomic.Value // int
+	configDrift          atomic.Value // float64 (deviation %)
 	performanceDeviation atomic.Value // float64
-	securityScore      atomic.Value // float64 (0-100)
-	complianceScore    atomic.Value // float64 (0-100)
-	quotaUsage         atomic.Value // float64 (0-1)
-	unauthorizedChanges atomic.Value // int
+	securityScore        atomic.Value // float64 (0-100)
+	complianceScore      atomic.Value // float64 (0-100)
+	quotaUsage           atomic.Value // float64 (0-1)
+	unauthorizedChanges  atomic.Value // int
 }
 
 // NewS2S3Loops creates S2↔S3 coordination control loops
@@ -26,7 +26,7 @@ func NewS2S3Loops(manager *LoopManager) *S2S3Loops {
 	s := &S2S3Loops{
 		manager: manager,
 	}
-	
+
 	// Initialize metrics
 	s.policyViolations.Store(0)
 	s.auditGaps.Store(0)
@@ -36,7 +36,7 @@ func NewS2S3Loops(manager *LoopManager) *S2S3Loops {
 	s.complianceScore.Store(100.0)
 	s.quotaUsage.Store(0.0)
 	s.unauthorizedChanges.Store(0)
-	
+
 	s.registerLoops()
 	return s
 }
@@ -57,13 +57,13 @@ func (s *S2S3Loops) registerLoops() {
 		Action: func() error {
 			violations := s.policyViolations.Load().(int)
 			log.Printf("🛡️ S2S3: Blocking %d policy violations", violations)
-			
+
 			// Reset after enforcement
 			s.policyViolations.Store(0)
 			return nil
 		},
 	})
-	
+
 	// LOOP-S2S3-002: Audit Trail Manager
 	s.manager.RegisterLoop(&FeedbackLoop{
 		ID:    "LOOP-S2S3-002",
@@ -79,13 +79,13 @@ func (s *S2S3Loops) registerLoops() {
 		Action: func() error {
 			gaps := s.auditGaps.Load().(int)
 			log.Printf("📝 S2S3: Reconstructing %d audit gaps", gaps)
-			
+
 			// Reconstruct missing events
 			s.auditGaps.Store(0)
 			return nil
 		},
 	})
-	
+
 	// LOOP-S2S3-003: Configuration Drift Monitor
 	s.manager.RegisterLoop(&FeedbackLoop{
 		ID:    "LOOP-S2S3-003",
@@ -98,13 +98,13 @@ func (s *S2S3Loops) registerLoops() {
 		Action: func() error {
 			drift := s.configDrift.Load().(float64)
 			log.Printf("⚙️ S2S3: Correcting %.1f%% config drift", drift*100)
-			
+
 			// Auto-correct configuration
 			s.configDrift.Store(0.0)
 			return nil
 		},
 	})
-	
+
 	// LOOP-S2S3-004: Performance Baseline Tracker
 	s.manager.RegisterLoop(&FeedbackLoop{
 		ID:    "LOOP-S2S3-004",
@@ -117,13 +117,13 @@ func (s *S2S3Loops) registerLoops() {
 		Action: func() error {
 			deviation := s.performanceDeviation.Load().(float64)
 			log.Printf("📊 S2S3: Investigating %.1f%% performance deviation", deviation*100)
-			
+
 			// Adjust performance parameters
 			s.performanceDeviation.Store(deviation * 0.5)
 			return nil
 		},
 	})
-	
+
 	// LOOP-S2S3-005: Security Posture Monitor
 	s.manager.RegisterLoop(&FeedbackLoop{
 		ID:    "LOOP-S2S3-005",
@@ -139,7 +139,7 @@ func (s *S2S3Loops) registerLoops() {
 		Action: func() error {
 			score := s.securityScore.Load().(float64)
 			log.Printf("🔒 S2S3: Remediating security score: %.1f", score)
-			
+
 			// Improve security score
 			newScore := score + 10
 			if newScore > 100 {
@@ -149,7 +149,7 @@ func (s *S2S3Loops) registerLoops() {
 			return nil
 		},
 	})
-	
+
 	// LOOP-S2S3-006: Compliance Validator
 	s.manager.RegisterLoop(&FeedbackLoop{
 		ID:    "LOOP-S2S3-006",
@@ -165,13 +165,13 @@ func (s *S2S3Loops) registerLoops() {
 		Action: func() error {
 			score := s.complianceScore.Load().(float64)
 			log.Printf("✅ S2S3: Generating remediation plan for %.1f%% compliance", score)
-			
+
 			// Improve compliance
 			s.complianceScore.Store(score + 5)
 			return nil
 		},
 	})
-	
+
 	// LOOP-S2S3-007: Resource Quota Enforcer
 	s.manager.RegisterLoop(&FeedbackLoop{
 		ID:    "LOOP-S2S3-007",
@@ -184,13 +184,13 @@ func (s *S2S3Loops) registerLoops() {
 		Action: func() error {
 			usage := s.quotaUsage.Load().(float64)
 			log.Printf("📉 S2S3: Throttling at %.1f%% quota usage", usage*100)
-			
+
 			// Throttle to reduce usage
 			s.quotaUsage.Store(usage * 0.8)
 			return nil
 		},
 	})
-	
+
 	// LOOP-S2S3-008: Change Control Monitor
 	s.manager.RegisterLoop(&FeedbackLoop{
 		ID:    "LOOP-S2S3-008",
@@ -206,7 +206,7 @@ func (s *S2S3Loops) registerLoops() {
 		Action: func() error {
 			changes := s.unauthorizedChanges.Load().(int)
 			log.Printf("🔄 S2S3: Rolling back %d unauthorized changes", changes)
-			
+
 			// Rollback changes
 			s.unauthorizedChanges.Store(0)
 			return nil
@@ -219,7 +219,7 @@ func (s *S2S3Loops) SimulateControlIssues() {
 	go func() {
 		ticker := time.NewTicker(2 * time.Second)
 		defer ticker.Stop()
-		
+
 		scenarios := []func(){
 			func() {
 				// Policy violations
@@ -262,7 +262,7 @@ func (s *S2S3Loops) SimulateControlIssues() {
 				log.Println("⚠️  Detected 2 unauthorized changes")
 			},
 		}
-		
+
 		i := 0
 		for range ticker.C {
 			if i < len(scenarios) {

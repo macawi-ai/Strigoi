@@ -436,14 +436,14 @@ func TestAnalyzeSecurityRisks(t *testing.T) {
 	}
 
 	// Add security findings for the same path
-	finding := SecurityFinding{
+	finding := Finding{
 		ID:       "risk1",
 		FilePath: "/test/config.json",
 		Severity: "high",
 	}
 
 	scanner.findings = []MCPTool{tool}
-	scanner.risks = []SecurityFinding{finding}
+	scanner.risks = []Finding{finding}
 
 	scanner.analyzeSecurityRisks()
 

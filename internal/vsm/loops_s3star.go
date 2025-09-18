@@ -9,15 +9,15 @@ import (
 // S3StarLoops implements S3↔S3* audit self-monitoring loops
 type S3StarLoops struct {
 	manager *LoopManager
-	
+
 	// Audit health metrics
-	auditIntegrity    atomic.Value // bool (tampering detected)
-	monitorHealth     atomic.Value // float64 (0-1 health score)
-	telemetryLoss     atomic.Value // int (lost events)
-	alertFatigue      atomic.Value // int (duplicate alerts)
-	auditCoverage     atomic.Value // float64 (0-1 coverage)
-	selfTestDue       atomic.Value // bool
-	lastSelfTest      time.Time
+	auditIntegrity atomic.Value // bool (tampering detected)
+	monitorHealth  atomic.Value // float64 (0-1 health score)
+	telemetryLoss  atomic.Value // int (lost events)
+	alertFatigue   atomic.Value // int (duplicate alerts)
+	auditCoverage  atomic.Value // float64 (0-1 coverage)
+	selfTestDue    atomic.Value // bool
+	lastSelfTest   time.Time
 }
 
 // NewS3StarLoops creates S3↔S3* audit loops
@@ -26,7 +26,7 @@ func NewS3StarLoops(manager *LoopManager) *S3StarLoops {
 		manager:      manager,
 		lastSelfTest: time.Now(),
 	}
-	
+
 	// Initialize metrics
 	s.auditIntegrity.Store(true)
 	s.monitorHealth.Store(1.0)
@@ -34,10 +34,10 @@ func NewS3StarLoops(manager *LoopManager) *S3StarLoops {
 	s.alertFatigue.Store(0)
 	s.auditCoverage.Store(1.0)
 	s.selfTestDue.Store(false)
-	
+
 	s.registerLoops()
 	s.startSelfTestScheduler()
-	
+
 	return s
 }
 
@@ -56,15 +56,15 @@ func (s *S3StarLoops) registerLoops() {
 		},
 		Action: func() error {
 			log.Printf("🔐 S3*: Audit tampering detected! Restoring from backup...")
-			
+
 			// Restore integrity
 			s.auditIntegrity.Store(true)
-			
+
 			// In production: restore from secure backup
 			return nil
 		},
 	})
-	
+
 	// LOOP-S3STAR-002: Monitor Health Check
 	s.manager.RegisterLoop(&FeedbackLoop{
 		ID:    "LOOP-S3STAR-002",
@@ -80,13 +80,13 @@ func (s *S3StarLoops) registerLoops() {
 		Action: func() error {
 			health := s.monitorHealth.Load().(float64)
 			log.Printf("🏥 S3*: Monitor health at %.0f%%, failover to backup", health*100)
-			
+
 			// Failover and restore health
 			s.monitorHealth.Store(1.0)
 			return nil
 		},
 	})
-	
+
 	// LOOP-S3STAR-003: Telemetry Pipeline Monitor
 	s.manager.RegisterLoop(&FeedbackLoop{
 		ID:    "LOOP-S3STAR-003",
@@ -102,13 +102,13 @@ func (s *S3StarLoops) registerLoops() {
 		Action: func() error {
 			loss := s.telemetryLoss.Load().(int)
 			log.Printf("📡 S3*: Buffering %d lost telemetry events", loss)
-			
+
 			// Buffer and retry
 			s.telemetryLoss.Store(0)
 			return nil
 		},
 	})
-	
+
 	// LOOP-S3STAR-004: Alert Fatigue Monitor
 	s.manager.RegisterLoop(&FeedbackLoop{
 		ID:    "LOOP-S3STAR-004",
@@ -124,13 +124,13 @@ func (s *S3StarLoops) registerLoops() {
 		Action: func() error {
 			fatigue := s.alertFatigue.Load().(int)
 			log.Printf("🔔 S3*: Aggregating %d duplicate alerts", fatigue)
-			
+
 			// Aggregate and summarize
 			s.alertFatigue.Store(0)
 			return nil
 		},
 	})
-	
+
 	// LOOP-S3STAR-005: Audit Coverage Validator
 	s.manager.RegisterLoop(&FeedbackLoop{
 		ID:    "LOOP-S3STAR-005",
@@ -146,7 +146,7 @@ func (s *S3StarLoops) registerLoops() {
 		Action: func() error {
 			coverage := s.auditCoverage.Load().(float64)
 			log.Printf("🎯 S3*: Expanding audit coverage from %.0f%%", coverage*100)
-			
+
 			// Add monitoring coverage
 			newCoverage := coverage + 0.1
 			if newCoverage > 1.0 {
@@ -156,7 +156,7 @@ func (s *S3StarLoops) registerLoops() {
 			return nil
 		},
 	})
-	
+
 	// LOOP-S3STAR-006: Self-Test Scheduler
 	s.manager.RegisterLoop(&FeedbackLoop{
 		ID:    "LOOP-S3STAR-006",
@@ -171,14 +171,14 @@ func (s *S3StarLoops) registerLoops() {
 		},
 		Action: func() error {
 			log.Printf("🧪 S3*: Running diagnostic self-test suite...")
-			
+
 			// Run diagnostics
 			s.runSelfTest()
-			
+
 			// Reset flag
 			s.selfTestDue.Store(false)
 			s.lastSelfTest = time.Now()
-			
+
 			return nil
 		},
 	})
@@ -189,7 +189,7 @@ func (s *S3StarLoops) startSelfTestScheduler() {
 	go func() {
 		ticker := time.NewTicker(30 * time.Second)
 		defer ticker.Stop()
-		
+
 		for range ticker.C {
 			s.selfTestDue.Store(true)
 		}
@@ -201,19 +201,19 @@ func (s *S3StarLoops) runSelfTest() {
 	// Test audit integrity
 	integrity := s.checkAuditIntegrity()
 	log.Printf("  ├─ Audit Integrity: %v", integrity)
-	
+
 	// Test monitor health
 	health := s.checkMonitorHealth()
 	log.Printf("  ├─ Monitor Health: %.0f%%", health*100)
-	
+
 	// Test telemetry pipeline
 	telemetryOK := s.checkTelemetryPipeline()
 	log.Printf("  ├─ Telemetry Pipeline: %v", telemetryOK)
-	
+
 	// Test alert system
 	alertsOK := s.checkAlertSystem()
 	log.Printf("  ├─ Alert System: %v", alertsOK)
-	
+
 	// Calculate overall audit health
 	overallHealth := 0.0
 	if integrity {
@@ -226,7 +226,7 @@ func (s *S3StarLoops) runSelfTest() {
 	if alertsOK {
 		overallHealth += 0.25
 	}
-	
+
 	log.Printf("  └─ Overall Audit Health: %.0f%%", overallHealth*100)
 }
 
@@ -254,7 +254,7 @@ func (s *S3StarLoops) checkAlertSystem() bool {
 func (s *S3StarLoops) SimulateAuditIssues() {
 	go func() {
 		time.Sleep(3 * time.Second)
-		
+
 		scenarios := []struct {
 			delay   time.Duration
 			action  func()
@@ -296,7 +296,7 @@ func (s *S3StarLoops) SimulateAuditIssues() {
 				message: "⚠️  Simulating audit tampering!",
 			},
 		}
-		
+
 		for _, scenario := range scenarios {
 			time.Sleep(scenario.delay)
 			log.Println(scenario.message)

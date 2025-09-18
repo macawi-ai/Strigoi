@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/macawi-ai/strigoi/modules/probe/security_audit"
+	"github.com/macawi-ai/strigoi/modules/probe/securityaudit"
 )
 
 func main() {
@@ -44,7 +44,7 @@ func main() {
 	}
 
 	// Build configuration
-	config := security_audit.AuditConfig{
+	config := securityaudit.AuditConfig{
 		SourcePaths:       []string{*sourcePath},
 		OutputPath:        *outputPath,
 		OutputFormat:      *outputFormat,
@@ -63,12 +63,12 @@ func main() {
 	}
 
 	// Create audit framework
-	framework := security_audit.NewAuditFramework(config)
+	framework := securityaudit.NewAuditFramework(config)
 
 	// Add compliance scanners if requested
 	if *compliance != "" {
 		standards := strings.Split(*compliance, ",")
-		complianceScanner := security_audit.NewComplianceScanner(standards)
+		complianceScanner := securityaudit.NewComplianceScanner(standards)
 		framework.AddScanner(complianceScanner)
 	}
 
@@ -171,7 +171,7 @@ Examples:
   audit -path . -format json -output audit.json`)
 }
 
-func printSummary(results *security_audit.AuditResults) {
+func printSummary(results *securityaudit.AuditResults) {
 	fmt.Println("\n=== Audit Summary ===")
 	fmt.Printf("Security Score: %.1f/100\n", results.Metrics.SecurityScore)
 	fmt.Printf("Total Issues:   %d\n", results.Summary.TotalIssues)

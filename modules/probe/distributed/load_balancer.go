@@ -363,8 +363,7 @@ func (b *AdaptiveBalancer) evaluateAndAdapt() {
 	avgResponseTime := b.metricsCollector.avgResponseTime
 
 	// Decision logic
-	newStrategy := b.currentStrategy
-
+	var newStrategy string
 	if failureRate > 0.1 {
 		// High failure rate - use round-robin to distribute load
 		newStrategy = "round-robin"

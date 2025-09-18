@@ -9,14 +9,14 @@ import (
 // S4S5Loops implements S4↔S5 strategic alignment loops
 type S4S5Loops struct {
 	manager *LoopManager
-	
+
 	// Strategic metrics
-	goalDeviation       atomic.Value // float64 (% off target)
-	riskScore           atomic.Value // float64 (0-100)
-	policyGaps          atomic.Value // int (missing policies)
-	innovationBacklog   atomic.Value // int (opportunities)
-	competitorThreat    atomic.Value // float64 (0-1)
-	regulatoryChanges   atomic.Value // int (new regulations)
+	goalDeviation     atomic.Value // float64 (% off target)
+	riskScore         atomic.Value // float64 (0-100)
+	policyGaps        atomic.Value // int (missing policies)
+	innovationBacklog atomic.Value // int (opportunities)
+	competitorThreat  atomic.Value // float64 (0-1)
+	regulatoryChanges atomic.Value // int (new regulations)
 }
 
 // NewS4S5Loops creates S4↔S5 strategic alignment loops
@@ -24,7 +24,7 @@ func NewS4S5Loops(manager *LoopManager) *S4S5Loops {
 	s := &S4S5Loops{
 		manager: manager,
 	}
-	
+
 	// Initialize strategic metrics
 	s.goalDeviation.Store(0.0)
 	s.riskScore.Store(30.0)
@@ -32,10 +32,10 @@ func NewS4S5Loops(manager *LoopManager) *S4S5Loops {
 	s.innovationBacklog.Store(0)
 	s.competitorThreat.Store(0.2)
 	s.regulatoryChanges.Store(0)
-	
+
 	s.registerLoops()
 	s.simulateStrategicEnvironment()
-	
+
 	return s
 }
 
@@ -56,13 +56,13 @@ func (s *S4S5Loops) registerLoops() {
 			deviation := s.goalDeviation.Load().(float64)
 			log.Printf("🎯 S4S5: Strategic goals %.1f%% off target", deviation*100)
 			log.Printf("  └─ Adjusting tactical execution plan")
-			
+
 			// Reduce deviation
 			s.goalDeviation.Store(deviation * 0.5)
 			return nil
 		},
 	})
-	
+
 	// LOOP-S4S5-002: Risk Assessment Updater
 	s.manager.RegisterLoop(&FeedbackLoop{
 		ID:    "LOOP-S4S5-002",
@@ -79,13 +79,13 @@ func (s *S4S5Loops) registerLoops() {
 			risk := s.riskScore.Load().(float64)
 			log.Printf("⚠️  S4S5: Risk score elevated to %.0f/100", risk)
 			log.Printf("  └─ Updating risk matrix and mitigation strategies")
-			
+
 			// Implement mitigation
 			s.riskScore.Store(risk * 0.7)
 			return nil
 		},
 	})
-	
+
 	// LOOP-S4S5-003: Policy Recommendation Engine
 	s.manager.RegisterLoop(&FeedbackLoop{
 		ID:    "LOOP-S4S5-003",
@@ -102,13 +102,13 @@ func (s *S4S5Loops) registerLoops() {
 			gaps := s.policyGaps.Load().(int)
 			log.Printf("📋 S4S5: Identified %d policy gaps", gaps)
 			log.Printf("  └─ Generating policy proposals for S5 review")
-			
+
 			// Create proposals
 			s.policyGaps.Store(0)
 			return nil
 		},
 	})
-	
+
 	// LOOP-S4S5-004: Innovation Tracker
 	s.manager.RegisterLoop(&FeedbackLoop{
 		ID:    "LOOP-S4S5-004",
@@ -125,7 +125,7 @@ func (s *S4S5Loops) registerLoops() {
 			backlog := s.innovationBacklog.Load().(int)
 			log.Printf("💡 S4S5: %d innovation opportunities in backlog", backlog)
 			log.Printf("  └─ Evaluating for strategic adoption")
-			
+
 			// Process innovations
 			processed := backlog / 2
 			if processed < 1 {
@@ -135,7 +135,7 @@ func (s *S4S5Loops) registerLoops() {
 			return nil
 		},
 	})
-	
+
 	// LOOP-S4S5-005: Competitive Analysis
 	s.manager.RegisterLoop(&FeedbackLoop{
 		ID:    "LOOP-S4S5-005",
@@ -152,13 +152,13 @@ func (s *S4S5Loops) registerLoops() {
 			threat := s.competitorThreat.Load().(float64)
 			log.Printf("🏆 S4S5: Competitor threat level: %.0f%%", threat*100)
 			log.Printf("  └─ Assessing strategic impact and response options")
-			
+
 			// Develop response
 			s.competitorThreat.Store(threat * 0.8)
 			return nil
 		},
 	})
-	
+
 	// LOOP-S4S5-006: Regulatory Compliance Tracker
 	s.manager.RegisterLoop(&FeedbackLoop{
 		ID:    "LOOP-S4S5-006",
@@ -175,7 +175,7 @@ func (s *S4S5Loops) registerLoops() {
 			changes := s.regulatoryChanges.Load().(int)
 			log.Printf("⚖️  S4S5: %d new regulatory changes detected", changes)
 			log.Printf("  └─ Assessing compliance requirements")
-			
+
 			// Process regulations
 			s.regulatoryChanges.Store(0)
 			return nil
@@ -188,7 +188,7 @@ func (s *S4S5Loops) simulateStrategicEnvironment() {
 	go func() {
 		ticker := time.NewTicker(8 * time.Second)
 		defer ticker.Stop()
-		
+
 		scenarios := []func(){
 			func() {
 				// Goal drift
@@ -221,7 +221,7 @@ func (s *S4S5Loops) simulateStrategicEnvironment() {
 				log.Println("📍 Strategic: New regulations published")
 			},
 		}
-		
+
 		i := 0
 		for range ticker.C {
 			if i < len(scenarios) {

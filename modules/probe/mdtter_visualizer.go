@@ -185,7 +185,7 @@ func (v *MDTTERVisualizer) GenerateComparativeAnalysis() string {
 
 	avgCurvature := totalCurvature / float32(len(v.events))
 
-	output.WriteString(fmt.Sprintf("  • Behavioral Dimensions: 128\n"))
+	output.WriteString("  • Behavioral Dimensions: 128\n")
 	output.WriteString(fmt.Sprintf("  • Trajectory Points: %d\n", len(v.trajectory)))
 	output.WriteString(fmt.Sprintf("  • Max Novelty (VAM): %.2f\n", maxVAM))
 	output.WriteString(fmt.Sprintf("  • Avg Curvature: %.2f\n", avgCurvature))

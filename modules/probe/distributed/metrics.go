@@ -306,47 +306,47 @@ func (e *PrometheusExporter) Export() string {
 	var output string
 
 	// Task metrics
-	output += fmt.Sprintf("# HELP strigoi_tasks_submitted_total Total tasks submitted\n")
-	output += fmt.Sprintf("# TYPE strigoi_tasks_submitted_total counter\n")
+	output += "# HELP strigoi_tasks_submitted_total Total tasks submitted\n"
+	output += "# TYPE strigoi_tasks_submitted_total counter\n"
 	output += fmt.Sprintf("strigoi_tasks_submitted_total %d\n\n", snapshot.TasksSubmitted)
 
-	output += fmt.Sprintf("# HELP strigoi_tasks_completed_total Total tasks completed\n")
-	output += fmt.Sprintf("# TYPE strigoi_tasks_completed_total counter\n")
+	output += "# HELP strigoi_tasks_completed_total Total tasks completed\n"
+	output += "# TYPE strigoi_tasks_completed_total counter\n"
 	output += fmt.Sprintf("strigoi_tasks_completed_total %d\n\n", snapshot.TasksCompleted)
 
-	output += fmt.Sprintf("# HELP strigoi_tasks_failed_total Total tasks failed\n")
-	output += fmt.Sprintf("# TYPE strigoi_tasks_failed_total counter\n")
+	output += "# HELP strigoi_tasks_failed_total Total tasks failed\n"
+	output += "# TYPE strigoi_tasks_failed_total counter\n"
 	output += fmt.Sprintf("strigoi_tasks_failed_total %d\n\n", snapshot.TasksFailed)
 
-	output += fmt.Sprintf("# HELP strigoi_tasks_retried_total Total tasks retried\n")
-	output += fmt.Sprintf("# TYPE strigoi_tasks_retried_total counter\n")
+	output += "# HELP strigoi_tasks_retried_total Total tasks retried\n"
+	output += "# TYPE strigoi_tasks_retried_total counter\n"
 	output += fmt.Sprintf("strigoi_tasks_retried_total %d\n\n", snapshot.TasksRetried)
 
-	output += fmt.Sprintf("# HELP strigoi_task_success_rate Task success rate\n")
-	output += fmt.Sprintf("# TYPE strigoi_task_success_rate gauge\n")
+	output += "# HELP strigoi_task_success_rate Task success rate\n"
+	output += "# TYPE strigoi_task_success_rate gauge\n"
 	output += fmt.Sprintf("strigoi_task_success_rate %f\n\n", snapshot.SuccessRate)
 
-	output += fmt.Sprintf("# HELP strigoi_task_processing_time_ms Average task processing time in milliseconds\n")
-	output += fmt.Sprintf("# TYPE strigoi_task_processing_time_ms gauge\n")
+	output += "# HELP strigoi_task_processing_time_ms Average task processing time in milliseconds\n"
+	output += "# TYPE strigoi_task_processing_time_ms gauge\n"
 	output += fmt.Sprintf("strigoi_task_processing_time_ms %f\n\n", snapshot.AvgProcessingTime)
 
 	// Node metrics
-	output += fmt.Sprintf("# HELP strigoi_nodes_registered_total Total nodes registered\n")
-	output += fmt.Sprintf("# TYPE strigoi_nodes_registered_total counter\n")
+	output += "# HELP strigoi_nodes_registered_total Total nodes registered\n"
+	output += "# TYPE strigoi_nodes_registered_total counter\n"
 	output += fmt.Sprintf("strigoi_nodes_registered_total %d\n\n", snapshot.NodesRegistered)
 
-	output += fmt.Sprintf("# HELP strigoi_nodes_unregistered_total Total nodes unregistered\n")
-	output += fmt.Sprintf("# TYPE strigoi_nodes_unregistered_total counter\n")
+	output += "# HELP strigoi_nodes_unregistered_total Total nodes unregistered\n"
+	output += "# TYPE strigoi_nodes_unregistered_total counter\n"
 	output += fmt.Sprintf("strigoi_nodes_unregistered_total %d\n\n", snapshot.NodesUnregistered)
 
-	output += fmt.Sprintf("# HELP strigoi_health_check_failures_total Total health check failures\n")
-	output += fmt.Sprintf("# TYPE strigoi_health_check_failures_total counter\n")
+	output += "# HELP strigoi_health_check_failures_total Total health check failures\n"
+	output += "# TYPE strigoi_health_check_failures_total counter\n"
 	output += fmt.Sprintf("strigoi_health_check_failures_total %d\n\n", snapshot.HealthCheckFailures)
 
 	// Node errors by node
 	if len(snapshot.NodeErrors) > 0 {
-		output += fmt.Sprintf("# HELP strigoi_node_errors_total Total errors by node\n")
-		output += fmt.Sprintf("# TYPE strigoi_node_errors_total counter\n")
+		output += "# HELP strigoi_node_errors_total Total errors by node\n"
+		output += "# TYPE strigoi_node_errors_total counter\n"
 		for nodeID, count := range snapshot.NodeErrors {
 			output += fmt.Sprintf("strigoi_node_errors_total{node=\"%s\"} %d\n", nodeID, count)
 		}

@@ -12,9 +12,9 @@ import (
 	"time"
 )
 
-// TelemetrySystem manages comprehensive error and performance telemetry
-type TelemetrySystem struct {
-	config       TelemetryConfig
+// System manages comprehensive error and performance telemetry
+type System struct {
+	config       Config
 	collectors   map[string]MetricCollector
 	errorTracker *ErrorTracker
 	perfTracker  *PerformanceTracker
@@ -26,8 +26,8 @@ type TelemetrySystem struct {
 	wg           sync.WaitGroup
 }
 
-// TelemetryConfig configures the telemetry system
-type TelemetryConfig struct {
+// Config configures the telemetry system
+type Config struct {
 	// HTTP endpoint configuration
 	ListenAddress string
 	MetricsPath   string
@@ -65,11 +65,11 @@ type MetricCollector interface {
 	Reset()
 }
 
-// NewTelemetrySystem creates a new telemetry system
-func NewTelemetrySystem(config TelemetryConfig) (*TelemetrySystem, error) {
+// NewSystem creates a new telemetry system
+func NewSystem(config Config) (*System, error) {
 	ctx, cancel := context.WithCancel(context.Background())
 
-	ts := &TelemetrySystem{
+	ts := &System{
 		config:       config,
 		collectors:   make(map[string]MetricCollector),
 		errorTracker: NewErrorTracker(),
@@ -102,7 +102,7 @@ func NewTelemetrySystem(config TelemetryConfig) (*TelemetrySystem, error) {
 }
 
 // setupHTTPServer sets up HTTP endpoints
-func (ts *TelemetrySystem) setupHTTPServer() {
+func (ts *System) setupHTTPServer() {
 	mux := http.NewServeMux()
 
 	// Prometheus metrics endpoint
@@ -140,7 +140,7 @@ func (ts *TelemetrySystem) setupHTTPServer() {
 }
 
 // handlePrometheusMetrics serves Prometheus format metrics
-func (ts *TelemetrySystem) handlePrometheusMetrics(w http.ResponseWriter, r *http.Request) {
+func (ts *System) handlePrometheusMetrics(w http.ResponseWriter, r *http.Request) {
 	ts.mu.RLock()
 	defer ts.mu.RUnlock()
 
@@ -153,7 +153,7 @@ func (ts *TelemetrySystem) handlePrometheusMetrics(w http.ResponseWriter, r *htt
 }
 
 // handleDetailedMetrics serves detailed JSON metrics
-func (ts *TelemetrySystem) handleDetailedMetrics(w http.ResponseWriter, r *http.Request) {
+func (ts *System) handleDetailedMetrics(w http.ResponseWriter, r *http.Request) {
 	ts.mu.RLock()
 	defer ts.mu.RUnlock()
 
@@ -170,7 +170,7 @@ func (ts *TelemetrySystem) handleDetailedMetrics(w http.ResponseWriter, r *http.
 }
 
 // handleHealth serves health status
-func (ts *TelemetrySystem) handleHealth(w http.ResponseWriter, r *http.Request) {
+func (ts *System) handleHealth(w http.ResponseWriter, r *http.Request) {
 	health := ts.GetHealth()
 
 	w.Header().Set("Content-Type", "application/json")
@@ -186,7 +186,7 @@ func (ts *TelemetrySystem) handleHealth(w http.ResponseWriter, r *http.Request) 
 }
 
 // handleAlerts serves alert status
-func (ts *TelemetrySystem) handleAlerts(w http.ResponseWriter, r *http.Request) {
+func (ts *System) handleAlerts(w http.ResponseWriter, r *http.Request) {
 	alerts := ts.alertManager.GetActiveAlerts()
 
 	w.Header().Set("Content-Type", "application/json")
@@ -196,7 +196,7 @@ func (ts *TelemetrySystem) handleAlerts(w http.ResponseWriter, r *http.Request) 
 }
 
 // handleGrafanaDashboard serves Grafana dashboard configuration
-func (ts *TelemetrySystem) handleGrafanaDashboard(w http.ResponseWriter, r *http.Request) {
+func (ts *System) handleGrafanaDashboard(w http.ResponseWriter, r *http.Request) {
 	dashboard := ts.generateGrafanaDashboard()
 
 	w.Header().Set("Content-Type", "application/json")
@@ -204,7 +204,7 @@ func (ts *TelemetrySystem) handleGrafanaDashboard(w http.ResponseWriter, r *http
 }
 
 // collectionLoop periodically collects metrics
-func (ts *TelemetrySystem) collectionLoop() {
+func (ts *System) collectionLoop() {
 	defer ts.wg.Done()
 
 	ticker := time.NewTicker(ts.config.CollectionInterval)
@@ -222,13 +222,13 @@ func (ts *TelemetrySystem) collectionLoop() {
 }
 
 // collectMetrics collects metrics from all sources
-func (ts *TelemetrySystem) collectMetrics() {
+func (ts *System) collectMetrics() {
 	// Collect metrics is handled by individual collectors
 	// This could aggregate or process collected data
 }
 
 // alertLoop monitors metrics for alert conditions
-func (ts *TelemetrySystem) alertLoop() {
+func (ts *System) alertLoop() {
 	defer ts.wg.Done()
 
 	ticker := time.NewTicker(30 * time.Second)
@@ -246,7 +246,7 @@ func (ts *TelemetrySystem) alertLoop() {
 }
 
 // checkAlertConditions checks for alert conditions
-func (ts *TelemetrySystem) checkAlertConditions() {
+func (ts *System) checkAlertConditions() {
 	ts.mu.RLock()
 	defer ts.mu.RUnlock()
 
@@ -291,22 +291,22 @@ func (ts *TelemetrySystem) checkAlertConditions() {
 }
 
 // RecordError records an error
-func (ts *TelemetrySystem) RecordError(err error, context string, severity ErrorSeverity) {
+func (ts *System) RecordError(err error, context string, severity ErrorSeverity) {
 	ts.errorTracker.RecordError(err, context, severity)
 }
 
 // RecordLatency records operation latency
-func (ts *TelemetrySystem) RecordLatency(operation string, duration time.Duration) {
+func (ts *System) RecordLatency(operation string, duration time.Duration) {
 	ts.perfTracker.RecordLatency(operation, duration)
 }
 
 // RecordThroughput records throughput metric
-func (ts *TelemetrySystem) RecordThroughput(metric string, value float64) {
+func (ts *System) RecordThroughput(metric string, value float64) {
 	ts.perfTracker.RecordThroughput(metric, value)
 }
 
 // GetHealth returns system health status
-func (ts *TelemetrySystem) GetHealth() HealthStatus {
+func (ts *System) GetHealth() HealthStatus {
 	errorMetrics := ts.errorTracker.Collect()
 	perfMetrics := ts.perfTracker.Collect()
 
@@ -332,7 +332,7 @@ func (ts *TelemetrySystem) GetHealth() HealthStatus {
 }
 
 // generateGrafanaDashboard generates Grafana dashboard JSON
-func (ts *TelemetrySystem) generateGrafanaDashboard() map[string]interface{} {
+func (ts *System) generateGrafanaDashboard() map[string]interface{} {
 	return map[string]interface{}{
 		"dashboard": map[string]interface{}{
 			"title": "Strigoi Telemetry Dashboard",
@@ -380,7 +380,7 @@ func (ts *TelemetrySystem) generateGrafanaDashboard() map[string]interface{} {
 }
 
 // Shutdown gracefully shuts down the telemetry system
-func (ts *TelemetrySystem) Shutdown(timeout time.Duration) error {
+func (ts *System) Shutdown(timeout time.Duration) error {
 	ts.cancel()
 
 	// Shutdown HTTP server
@@ -511,21 +511,21 @@ func (et *ErrorTracker) Export() string {
 	output := ""
 
 	// Total errors
-	output += fmt.Sprintf("# HELP strigoi_errors_total Total number of errors\n")
-	output += fmt.Sprintf("# TYPE strigoi_errors_total counter\n")
+	output += "# HELP strigoi_errors_total Total number of errors\n"
+	output += "# TYPE strigoi_errors_total counter\n"
 	output += fmt.Sprintf("strigoi_errors_total %d\n\n", metrics["total_errors"])
 
 	// Error rate
-	output += fmt.Sprintf("# HELP strigoi_error_rate Current error rate\n")
-	output += fmt.Sprintf("# TYPE strigoi_error_rate gauge\n")
+	output += "# HELP strigoi_error_rate Current error rate\n"
+	output += "# TYPE strigoi_error_rate gauge\n"
 	output += fmt.Sprintf("strigoi_error_rate %f\n\n", metrics["error_rate"])
 
 	// Errors by context
 	et.mu.RLock()
 	defer et.mu.RUnlock()
 
-	output += fmt.Sprintf("# HELP strigoi_errors_by_context Errors by context\n")
-	output += fmt.Sprintf("# TYPE strigoi_errors_by_context counter\n")
+	output += "# HELP strigoi_errors_by_context Errors by context\n"
+	output += "# TYPE strigoi_errors_by_context counter\n"
 	for context, metric := range et.errors {
 		output += fmt.Sprintf("strigoi_errors_by_context{context=\"%s\"} %d\n", context, metric.Count)
 	}
@@ -659,8 +659,8 @@ func (pt *PerformanceTracker) Export() string {
 	output := ""
 
 	// Latency metrics
-	output += fmt.Sprintf("# HELP strigoi_latency_seconds Operation latency in seconds\n")
-	output += fmt.Sprintf("# TYPE strigoi_latency_seconds summary\n")
+	output += "# HELP strigoi_latency_seconds Operation latency in seconds\n"
+	output += "# TYPE strigoi_latency_seconds summary\n"
 
 	if p50, ok := metrics["latency_p50"].(time.Duration); ok {
 		output += fmt.Sprintf("strigoi_latency_seconds{quantile=\"0.5\"} %f\n", p50.Seconds())
@@ -749,16 +749,16 @@ func (sc *SystemCollector) Export() string {
 
 	output := ""
 
-	output += fmt.Sprintf("# HELP strigoi_cpu_usage CPU usage percentage\n")
-	output += fmt.Sprintf("# TYPE strigoi_cpu_usage gauge\n")
+	output += "# HELP strigoi_cpu_usage CPU usage percentage\n"
+	output += "# TYPE strigoi_cpu_usage gauge\n"
 	output += fmt.Sprintf("strigoi_cpu_usage %f\n\n", metrics["cpu_usage"])
 
-	output += fmt.Sprintf("# HELP strigoi_memory_usage_bytes Memory usage in bytes\n")
-	output += fmt.Sprintf("# TYPE strigoi_memory_usage_bytes gauge\n")
+	output += "# HELP strigoi_memory_usage_bytes Memory usage in bytes\n"
+	output += "# TYPE strigoi_memory_usage_bytes gauge\n"
 	output += fmt.Sprintf("strigoi_memory_usage_bytes %d\n\n", metrics["memory_usage"])
 
-	output += fmt.Sprintf("# HELP strigoi_goroutines Number of goroutines\n")
-	output += fmt.Sprintf("# TYPE strigoi_goroutines gauge\n")
+	output += "# HELP strigoi_goroutines Number of goroutines\n"
+	output += "# TYPE strigoi_goroutines gauge\n"
 	output += fmt.Sprintf("strigoi_goroutines %d\n", metrics["goroutines"])
 
 	return output

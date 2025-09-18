@@ -20,9 +20,9 @@ import (
 type MCPScanner struct {
 	executor    *SecureExecutor
 	logger      *logrus.Logger
-	rules       *SecurityRuleEngine
+	rules       *RuleEngine
 	findings    []MCPTool
-	risks       []SecurityFinding
+	risks       []Finding
 	includeSelf bool
 	mu          sync.Mutex
 }
@@ -39,7 +39,7 @@ type MCPTool struct {
 	Status        string                 `json:"status"` // "running", "stopped", "configured"
 	Dependencies  []MCPDependency        `json:"dependencies,omitempty"`
 	Configuration map[string]interface{} `json:"configuration,omitempty"`
-	SecurityRisks []SecurityFinding      `json:"security_risks,omitempty"`
+	SecurityRisks []Finding              `json:"security_risks,omitempty"`
 	Timestamp     time.Time              `json:"timestamp"`
 	// Enhanced fields for Phase 1
 	ExecutablePath  string              `json:"executable_path,omitempty"`
@@ -100,9 +100,9 @@ func NewMCPScanner(executor *SecureExecutor) *MCPScanner {
 	return &MCPScanner{
 		executor:    executor,
 		logger:      logger,
-		rules:       NewSecurityRuleEngine(),
+		rules:       NewRuleEngine(),
 		findings:    []MCPTool{},
-		risks:       []SecurityFinding{},
+		risks:       []Finding{},
 		includeSelf: false, // Default: exclude self-scanning
 	}
 }
@@ -280,7 +280,7 @@ func (ms *MCPScanner) scanFile(filePath string) {
 		ms.logger.WithField("file", filePath).Debug("Scanning for security risks...")
 		findings := ms.rules.ScanContent(string(content), filePath)
 		ms.logger.WithField("file", filePath).WithField("findings_count", len(findings)).Debug("Security scan completed")
-		ms.addSecurityFindings(findings)
+		ms.addFindings(findings)
 
 		// Analyze and correlate security risks for this specific scan
 		ms.analyzeSecurityRisks()
@@ -632,7 +632,7 @@ func (ms *MCPScanner) addFinding(tool MCPTool) {
 	ms.findings = append(ms.findings, tool)
 }
 
-func (ms *MCPScanner) addSecurityFindings(findings []SecurityFinding) {
+func (ms *MCPScanner) addFindings(findings []Finding) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	for _, finding := range findings {
@@ -684,7 +684,7 @@ func (ms *MCPScanner) analyzeSecurityRisks() {
 	// Attach security findings to tools
 	for i, tool := range ms.findings {
 		ms.logger.WithField("tool_name", tool.Name).WithField("tool_config_path", tool.ConfigPath).Debug("Analyzing risks for tool")
-		var toolRisks []SecurityFinding
+		var toolRisks []Finding
 
 		for _, risk := range ms.risks {
 			ms.logger.WithField("tool_config_path", tool.ConfigPath).WithField("risk_file_path", risk.FilePath).Debug("Comparing paths for risk correlation")

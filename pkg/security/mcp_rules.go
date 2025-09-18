@@ -11,16 +11,16 @@ import (
 	"github.com/google/uuid"
 )
 
-// SecurityRuleEngine manages and executes security rules for MCP scanning.
-type SecurityRuleEngine struct {
-	rules           []SecurityRule
+// RuleEngine manages and executes security rules for MCP scanning.
+type RuleEngine struct {
+	rules           []Rule
 	compiledRules   map[string]*CompiledRule
 	credPatterns    map[string]*regexp.Regexp
 	processPatterns []*regexp.Regexp
 }
 
-// SecurityRule defines a security check for MCP components.
-type SecurityRule struct {
+// Rule defines a security check for MCP components.
+type Rule struct {
 	ID          string   `json:"id"`
 	Name        string   `json:"name"`
 	Category    string   `json:"category"`               // "credential_exposure", "insecure_config", "network_exposure"
@@ -35,13 +35,13 @@ type SecurityRule struct {
 
 // CompiledRule contains a security rule with pre-compiled regex.
 type CompiledRule struct {
-	Rule      SecurityRule
+	Rule      Rule
 	Pattern   *regexp.Regexp
 	PathRegex *regexp.Regexp
 }
 
-// SecurityFinding represents a discovered security issue.
-type SecurityFinding struct {
+// Finding represents a discovered security issue.
+type Finding struct {
 	ID          string    `json:"id"`
 	RuleID      string    `json:"rule_id"`
 	Name        string    `json:"name"`
@@ -56,10 +56,10 @@ type SecurityFinding struct {
 	Timestamp   time.Time `json:"timestamp"`
 }
 
-// NewSecurityRuleEngine creates a new rule engine with default MCP security rules.
-func NewSecurityRuleEngine() *SecurityRuleEngine {
-	engine := &SecurityRuleEngine{
-		rules:         []SecurityRule{},
+// NewRuleEngine creates a new rule engine with default MCP security rules.
+func NewRuleEngine() *RuleEngine {
+	engine := &RuleEngine{
+		rules:         []Rule{},
 		compiledRules: make(map[string]*CompiledRule),
 		credPatterns:  make(map[string]*regexp.Regexp),
 	}
@@ -70,8 +70,8 @@ func NewSecurityRuleEngine() *SecurityRuleEngine {
 }
 
 // loadDefaultRules loads the default security rules for MCP scanning.
-func (sre *SecurityRuleEngine) loadDefaultRules() {
-	defaultRules := []SecurityRule{
+func (sre *RuleEngine) loadDefaultRules() {
+	defaultRules := []Rule{
 		{
 			ID:          "MCP-CRED-001",
 			Name:        "Hardcoded API Key",
@@ -183,7 +183,7 @@ func (sre *SecurityRuleEngine) loadDefaultRules() {
 }
 
 // compileCredentialPatterns pre-compiles common credential detection patterns.
-func (sre *SecurityRuleEngine) compileCredentialPatterns() {
+func (sre *RuleEngine) compileCredentialPatterns() {
 	patterns := map[string]string{
 		// JSON-style patterns
 		"api_key":    `(?i)"(api[_-]?key|apikey)"\s*:\s*"([^"]{16,})"`,
@@ -207,7 +207,7 @@ func (sre *SecurityRuleEngine) compileCredentialPatterns() {
 }
 
 // compileProcessPatterns pre-compiles process detection patterns.
-func (sre *SecurityRuleEngine) compileProcessPatterns() {
+func (sre *RuleEngine) compileProcessPatterns() {
 	patterns := []string{
 		`(?i)mcp[_-]?server`,
 		`(?i)claude[_-]?mcp`,
@@ -225,7 +225,7 @@ func (sre *SecurityRuleEngine) compileProcessPatterns() {
 }
 
 // AddRule adds a new security rule to the engine.
-func (sre *SecurityRuleEngine) AddRule(rule SecurityRule) error {
+func (sre *RuleEngine) AddRule(rule Rule) error {
 	// Validate rule
 	if rule.ID == "" {
 		return fmt.Errorf("rule ID cannot be empty")
@@ -260,8 +260,8 @@ func (sre *SecurityRuleEngine) AddRule(rule SecurityRule) error {
 }
 
 // ScanContent scans content against all applicable security rules.
-func (sre *SecurityRuleEngine) ScanContent(content, filePath string) []SecurityFinding {
-	var findings []SecurityFinding
+func (sre *RuleEngine) ScanContent(content, filePath string) []Finding {
+	var findings []Finding
 
 	fileExt := getFileExtension(filePath)
 
@@ -282,7 +282,7 @@ func (sre *SecurityRuleEngine) ScanContent(content, filePath string) []SecurityF
 		matches := compiledRule.Pattern.FindAllStringSubmatch(content, -1)
 
 		for _, match := range matches {
-			finding := SecurityFinding{
+			finding := Finding{
 				ID:          uuid.New().String(),
 				RuleID:      rule.ID,
 				Name:        rule.Name,
@@ -310,13 +310,13 @@ func (sre *SecurityRuleEngine) ScanContent(content, filePath string) []SecurityF
 }
 
 // ScanCredentials scans content specifically for credential patterns.
-func (sre *SecurityRuleEngine) ScanCredentials(content, filePath string) []SecurityFinding {
-	var findings []SecurityFinding
+func (sre *RuleEngine) ScanCredentials(content, filePath string) []Finding {
+	var findings []Finding
 
 	for credType, pattern := range sre.credPatterns {
 		matches := pattern.FindAllStringSubmatch(content, -1)
 		for _, match := range matches {
-			finding := SecurityFinding{
+			finding := Finding{
 				ID:          uuid.New().String(),
 				RuleID:      fmt.Sprintf("CRED-%s", strings.ToUpper(credType)),
 				Name:        fmt.Sprintf("Credential Exposure - %s", credType),
@@ -337,7 +337,7 @@ func (sre *SecurityRuleEngine) ScanCredentials(content, filePath string) []Secur
 }
 
 // MatchProcess checks if a process matches MCP patterns.
-func (sre *SecurityRuleEngine) MatchProcess(processLine string) bool {
+func (sre *RuleEngine) MatchProcess(processLine string) bool {
 	for _, pattern := range sre.processPatterns {
 		if pattern.MatchString(processLine) {
 			return true
@@ -347,13 +347,13 @@ func (sre *SecurityRuleEngine) MatchProcess(processLine string) bool {
 }
 
 // LoadRulesFromFile loads security rules from a JSON file.
-func (sre *SecurityRuleEngine) LoadRulesFromFile(filePath string) error {
+func (sre *RuleEngine) LoadRulesFromFile(filePath string) error {
 	data, err := os.ReadFile(filePath)
 	if err != nil {
 		return fmt.Errorf("failed to read rules file: %w", err)
 	}
 
-	var rules []SecurityRule
+	var rules []Rule
 	if err := json.Unmarshal(data, &rules); err != nil {
 		return fmt.Errorf("failed to parse rules file: %w", err)
 	}

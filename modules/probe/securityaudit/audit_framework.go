@@ -1,4 +1,4 @@
-package security_audit
+package securityaudit
 
 import (
 	"crypto/sha256"

@@ -132,13 +132,13 @@ func (s *Storage) Delete(name string) error {
 }
 
 // List returns information about all stored sessions.
-func (s *Storage) List() ([]SessionInfo, error) {
+func (s *Storage) List() ([]Info, error) {
 	entries, err := os.ReadDir(s.basePath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to list sessions: %w", err)
 	}
 
-	var sessions []SessionInfo
+	var sessions []Info
 	for _, entry := range entries {
 		if entry.IsDir() {
 			continue
@@ -158,7 +158,7 @@ func (s *Storage) List() ([]SessionInfo, error) {
 			continue
 		}
 
-		sessions = append(sessions, SessionInfo{
+		sessions = append(sessions, Info{
 			Name:     sessionName,
 			Modified: info.ModTime(),
 			Size:     info.Size(),
@@ -195,8 +195,8 @@ func (s *Storage) Import(inputPath string, name string) error {
 	return s.Write(name, data)
 }
 
-// SessionInfo contains basic information about a stored session.
-type SessionInfo struct {
+// Info contains basic information about a stored session.
+type Info struct {
 	Name        string
 	Description string
 	Module      string
@@ -206,14 +206,14 @@ type SessionInfo struct {
 	Encrypted   bool
 }
 
-// LoadSessionInfo loads basic session information without decrypting.
-func (s *Storage) LoadSessionInfo(name string) (*SessionInfo, error) {
+// LoadInfo loads basic session information without decrypting.
+func (s *Storage) LoadInfo(name string) (*Info, error) {
 	data, err := s.Read(name)
 	if err != nil {
 		return nil, err
 	}
 
-	info := &SessionInfo{
+	info := &Info{
 		Name:      name,
 		Size:      int64(len(data)),
 		Encrypted: true, // Assume encrypted by default
