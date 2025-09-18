@@ -106,7 +106,7 @@ jobs:
           audit -all -max-critical 0 -max-high 5 -format json -output audit.json
       
       - name: Upload Security Report
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: security-audit-report
@@ -185,7 +185,7 @@ jobs:
           go-licenses csv ./... > licenses.csv
       
       - name: Upload license report
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: license-report
           path: licenses.csv
@@ -256,7 +256,7 @@ jobs:
           ./loadtest -scenario all -duration 5m -output load-test-results.json
       
       - name: Upload load test results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: load-test-results
           path: load-test-results.json
@@ -325,7 +325,7 @@ jobs:
     if: always()
     steps:
       - name: Download all artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
       
       - name: Generate security summary
         run: |
@@ -345,7 +345,7 @@ jobs:
           echo "- Dependency Check: ${{ needs.dependency-check.result }}" >> security-summary.md
       
       - name: Upload summary
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: security-summary
           path: security-summary.md
