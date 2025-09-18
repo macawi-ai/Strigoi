@@ -87,8 +87,8 @@ func (s *DependencyScanner) Scan(path string, config AuditConfig) ([]SecurityIss
 	}
 
 	// Check for package.json (if using Node modules)
-	packageJsonPath := filepath.Join(path, "package.json")
-	if _, err := os.Stat(packageJsonPath); err == nil {
+	packageJSONPath := filepath.Join(path, "package.json")
+	if _, err := os.Stat(packageJSONPath); err == nil {
 		issues = append(issues, s.scanNodeModules(path)...)
 	}
 

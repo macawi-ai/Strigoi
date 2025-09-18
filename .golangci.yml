@@ -13,10 +13,10 @@ linters:
     - unused
     - misspell
     - goimports
+    - revive    # Re-enabled for cleanup
   disable:
     - errcheck  # Too many violations for now
     - gosec     # Security issues to address later
-    - revive    # Style issues to address later
     - godot     # Comment period issues
 
 linters-settings:

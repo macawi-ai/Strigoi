@@ -499,13 +499,14 @@ func calculateDimensionalDepth(eam float32, resonance *ResonancePattern) int32 {
 func determineEvolutionStage(node *ConsciousnessNode) string {
 	if node.EmergenceLevel < 0.3 {
 		return "seed"
-	} else if node.EmergenceLevel < 0.6 {
-		return "sprouting"
-	} else if node.EmergenceLevel < 0.8 {
-		return "flowering"
-	} else {
-		return "reproducing"
 	}
+	if node.EmergenceLevel < 0.6 {
+		return "sprouting"
+	}
+	if node.EmergenceLevel < 0.8 {
+		return "flowering"
+	}
+	return "reproducing"
 }
 
 func calculateHarmonic(a, b []float32) float32 {

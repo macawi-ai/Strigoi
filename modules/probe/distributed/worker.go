@@ -159,7 +159,8 @@ func (w *Worker) setupHTTPServer() {
 
 	go func() {
 		if err := w.httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			// Log error
+			// TODO: Add proper error logging
+			_ = err
 		}
 	}()
 }

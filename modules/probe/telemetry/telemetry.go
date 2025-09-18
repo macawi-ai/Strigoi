@@ -132,7 +132,8 @@ func (ts *TelemetrySystem) setupHTTPServer() {
 
 	go func() {
 		if err := ts.httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			// Log error
+			// TODO: Add proper error logging
+			_ = err
 		}
 	}()
 }
