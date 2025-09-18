@@ -372,7 +372,9 @@ func ExampleMDTTEREvolution() {
 
 	// Start streaming
 	ctx := context.Background()
-	streamer.Start(ctx)
+	if err := streamer.Start(ctx); err != nil {
+		log.Printf("Failed to start MDTTER streamer: %v", err)
+	}
 
 	log.Println("MDTTER Streamer: Feeding legacy systems their comfort food while we hunt in higher dimensions")
 }

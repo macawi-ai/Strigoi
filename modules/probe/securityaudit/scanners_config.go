@@ -3,7 +3,6 @@ package securityaudit
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -67,7 +66,7 @@ func (s *ConfigScanner) Scan(path string, config AuditConfig) ([]SecurityIssue, 
 func (s *ConfigScanner) scanConfigFile(filename string) ([]SecurityIssue, error) {
 	var issues []SecurityIssue
 
-	content, err := ioutil.ReadFile(filename)
+	content, err := os.ReadFile(filename)
 	if err != nil {
 		return issues, err
 	}
@@ -353,7 +352,7 @@ func (s *ConfigScanner) checkInsecureDefaults(path string) []SecurityIssue {
 
 	for file, pattern := range defaultFiles {
 		filePath := filepath.Join(path, file)
-		if content, err := ioutil.ReadFile(filePath); err == nil {
+		if content, err := os.ReadFile(filePath); err == nil {
 			if matched, _ := regexp.Match(pattern, content); matched {
 				issues = append(issues, SecurityIssue{
 					Type:        "INSECURE_DEFAULT_CONFIG",
@@ -446,7 +445,7 @@ func (s *SecretsScanner) Scan(path string, config AuditConfig) ([]SecurityIssue,
 }
 
 func (s *SecretsScanner) scanFile(filename string) ([]SecurityIssue, error) {
-	content, err := ioutil.ReadFile(filename)
+	content, err := os.ReadFile(filename)
 	if err != nil {
 		return nil, err
 	}

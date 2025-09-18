@@ -295,4 +295,3 @@ func getColoredUsage(c *cobra.Command) string {
 
 	return b.String()
 }
-

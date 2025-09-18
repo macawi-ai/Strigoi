@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -333,7 +334,9 @@ func (c *Coordinator) partitionTasks(tasks []*ProcessingTask) map[string][]*Proc
 			// No healthy nodes, queue for retry
 			go func(t *ProcessingTask) {
 				time.Sleep(time.Second)
-				c.Submit(t)
+				if err := c.Submit(t); err != nil {
+					log.Printf("Failed to resubmit task after retry: %v", err)
+				}
 			}(task)
 			continue
 		}
@@ -359,7 +362,9 @@ func (c *Coordinator) processPartition(nodeID string, tasks []*ProcessingTask) {
 	if !exists {
 		// Node disappeared, resubmit tasks
 		for _, task := range tasks {
-			c.Submit(task)
+			if err := c.Submit(task); err != nil {
+				log.Printf("Failed to resubmit task after node disappeared: %v", err)
+			}
 		}
 		return
 	}
@@ -419,7 +424,9 @@ func (c *Coordinator) handleNodeFailure(nodeID string, tasks []*ProcessingTask, 
 			// Resubmit with delay
 			go func(t *ProcessingTask) {
 				time.Sleep(time.Duration(t.RetryCount) * time.Second)
-				c.Submit(t)
+				if err := c.Submit(t); err != nil {
+					log.Printf("Failed to resubmit task after retry %d: %v", t.RetryCount, err)
+				}
 			}(task)
 		} else {
 			// Max retries exceeded, send failure result

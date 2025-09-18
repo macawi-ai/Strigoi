@@ -317,13 +317,19 @@ func (e *CaptureEngineV2) captureWithStrace(pid int) error {
 	if streamData, err := strace.Read(); err == nil && streamData != nil {
 		// Write captured data to appropriate buffers
 		if len(streamData.Stdin) > 0 {
-			capture.stdinBuffer.Write(streamData.Stdin)
+			if _, err := capture.stdinBuffer.Write(streamData.Stdin); err != nil {
+				log.Printf("Failed to write stdin data: %v", err)
+			}
 		}
 		if len(streamData.Stdout) > 0 {
-			capture.stdoutBuffer.Write(streamData.Stdout)
+			if _, err := capture.stdoutBuffer.Write(streamData.Stdout); err != nil {
+				log.Printf("Failed to write stdout data: %v", err)
+			}
 		}
 		if len(streamData.Stderr) > 0 {
-			capture.stderrBuffer.Write(streamData.Stderr)
+			if _, err := capture.stderrBuffer.Write(streamData.Stderr); err != nil {
+				log.Printf("Failed to write stderr data: %v", err)
+			}
 		}
 
 		stats := e.captureStats[pid]

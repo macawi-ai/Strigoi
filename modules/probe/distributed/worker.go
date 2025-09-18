@@ -183,7 +183,9 @@ func (w *Worker) handleTask(rw http.ResponseWriter, r *http.Request) {
 	case w.taskQueue <- &task:
 		w.metrics.RecordTaskReceived()
 		rw.WriteHeader(http.StatusAccepted)
-		json.NewEncoder(rw).Encode(map[string]string{"status": "queued"})
+		if err := json.NewEncoder(rw).Encode(map[string]string{"status": "queued"}); err != nil {
+			http.Error(rw, "Failed to encode response", http.StatusInternalServerError)
+		}
 	default:
 		w.metrics.RecordQueueFull()
 		http.Error(rw, "Queue full", http.StatusServiceUnavailable)
@@ -237,7 +239,9 @@ func (w *Worker) handleBatch(rw http.ResponseWriter, r *http.Request) {
 	case <-done:
 		// All tasks completed
 		rw.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(rw).Encode(results)
+		if err := json.NewEncoder(rw).Encode(results); err != nil {
+			http.Error(rw, "Failed to encode results", http.StatusInternalServerError)
+		}
 	case <-ctx.Done():
 		// Timeout
 		http.Error(rw, "Processing timeout", http.StatusRequestTimeout)
@@ -255,7 +259,9 @@ func (w *Worker) handleHealth(rw http.ResponseWriter, r *http.Request) {
 		rw.WriteHeader(http.StatusServiceUnavailable)
 	}
 
-	json.NewEncoder(rw).Encode(health)
+	if err := json.NewEncoder(rw).Encode(health); err != nil {
+		http.Error(rw, "Failed to encode health status", http.StatusInternalServerError)
+	}
 }
 
 // handleMetrics handles metrics requests
@@ -263,7 +269,9 @@ func (w *Worker) handleMetrics(rw http.ResponseWriter, r *http.Request) {
 	metrics := w.metrics.GetSnapshot()
 
 	rw.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(rw).Encode(metrics)
+	if err := json.NewEncoder(rw).Encode(metrics); err != nil {
+		http.Error(rw, "Failed to encode metrics", http.StatusInternalServerError)
+	}
 }
 
 // processLoop processes tasks from the queue

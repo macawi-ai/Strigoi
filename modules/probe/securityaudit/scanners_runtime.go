@@ -3,7 +3,6 @@ package securityaudit
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -46,7 +45,7 @@ func (s *MemoryScanner) Scan(path string, config AuditConfig) ([]SecurityIssue, 
 			return nil
 		}
 
-		content, err := ioutil.ReadFile(file)
+		content, err := os.ReadFile(file)
 		if err != nil {
 			return nil
 		}
@@ -210,7 +209,7 @@ func TestMemoryAudit(t *testing.T) {
 	}
 }`
 
-	if err := ioutil.WriteFile(testFile, []byte(testContent), 0600); err == nil {
+	if err := os.WriteFile(testFile, []byte(testContent), 0600); err == nil {
 		defer os.Remove(testFile)
 
 		cmd := exec.Command("go", "test", "-v", testFile)
@@ -307,7 +306,7 @@ func (s *RaceScanner) Scan(path string, config AuditConfig) ([]SecurityIssue, er
 }
 
 func (s *RaceScanner) analyzeFile(filename string) ([]SecurityIssue, error) {
-	content, err := ioutil.ReadFile(filename)
+	content, err := os.ReadFile(filename)
 	if err != nil {
 		return nil, err
 	}
@@ -405,7 +404,7 @@ func (s *NetworkScanner) Scan(path string, config AuditConfig) ([]SecurityIssue,
 			return nil
 		}
 
-		content, err := ioutil.ReadFile(file)
+		content, err := os.ReadFile(file)
 		if err != nil {
 			return nil
 		}
@@ -568,7 +567,7 @@ func (s *TLSScanner) Scan(path string, config AuditConfig) ([]SecurityIssue, err
 			return nil
 		}
 
-		content, err := ioutil.ReadFile(file)
+		content, err := os.ReadFile(file)
 		if err != nil {
 			return nil
 		}

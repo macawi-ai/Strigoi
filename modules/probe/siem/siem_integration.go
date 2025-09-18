@@ -305,7 +305,9 @@ func (c *EventConverter) extractHTTPFields(frame *probe.Frame, event *SecurityEv
 	if status, ok := frame.Fields["status_code"]; ok {
 		switch v := status.(type) {
 		case string:
-			fmt.Sscanf(v, "%d", &event.HTTPStatusCode)
+			if _, err := fmt.Sscanf(v, "%d", &event.HTTPStatusCode); err != nil {
+				// Invalid status code format, leave as default
+			}
 		case int:
 			event.HTTPStatusCode = v
 		case float64:

@@ -200,7 +200,9 @@ func (ts *System) handleGrafanaDashboard(w http.ResponseWriter, r *http.Request)
 	dashboard := ts.generateGrafanaDashboard()
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(dashboard)
+	if err := json.NewEncoder(w).Encode(dashboard); err != nil {
+		http.Error(w, "Failed to encode dashboard", http.StatusInternalServerError)
+	}
 }
 
 // collectionLoop periodically collects metrics
