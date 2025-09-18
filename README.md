@@ -182,9 +182,24 @@ Copyright © September 2025 Macawi LLC. All Rights Reserved.
 
 This work is licensed under the [Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License](http://creativecommons.org/licenses/by-nc-sa/4.0/).
 
-**Attribution Required**: "Strigoi Security Validation Platform by Macawi LLC"
+### Attribution Requirements
 
-**Commercial Use**: Contact support@macawi.ai for commercial licensing.
+When using, redistributing, or referencing this software, you must include:
+"Strigoi Security Validation Platform by Macawi LLC (https://github.com/macawi-ai/Strigoi)"
+
+### Commercial Licensing
+
+For commercial use, custom licensing, or professional support, contact:
+- **Email**: support@macawi.ai
+- **Website**: https://macawi.ai
+
+### License Terms
+
+- ✅ **Share** — Copy and redistribute for non-commercial purposes
+- ✅ **Adapt** — Remix, transform, and build upon the material
+- ❌ **No Commercial Use** — Commercial use requires explicit licensing
+- 🔄 **ShareAlike** — Derivatives must use the same license
+- 📝 **Attribution** — Must credit Macawi LLC with proper attribution
 
 ---
 
