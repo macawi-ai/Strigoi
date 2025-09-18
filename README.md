@@ -178,7 +178,7 @@ Strigoi is specifically designed to address the unique security challenges of AI
 
 ## License
 
-Copyright © 2025 Macawi LLC. All Rights Reserved.
+Copyright © September 2025 Macawi LLC. All Rights Reserved.
 
 This work is licensed under the [Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License](http://creativecommons.org/licenses/by-nc-sa/4.0/).
 
