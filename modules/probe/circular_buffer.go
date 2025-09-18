@@ -47,8 +47,9 @@ func (cb *CircularBuffer) Write(p []byte) (n int, err error) {
 
 	// If this write would overflow, make space
 	if len(p) > cb.Available() {
-		// Drop oldest complete events until we have space
-		cb.makeSpace(len(p))
+		// Calculate how much space we need to free up
+		spaceNeeded := len(p) - cb.Available()
+		cb.makeSpace(spaceNeeded)
 	}
 
 	// Write data in a circular manner
@@ -64,7 +65,7 @@ func (cb *CircularBuffer) Write(p []byte) (n int, err error) {
 		}
 	}
 
-	// Ensure we don't exceed buffer size
+	// Ensure we don't exceed buffer size (fallback for non-event-boundary cases)
 	if cb.count > cb.size {
 		excess := cb.count - cb.size
 		cb.tail = (cb.tail + excess) % cb.size
@@ -156,7 +157,7 @@ func (cb *CircularBuffer) makeSpace(needed int) {
 		return
 	}
 
-	// Find event boundaries and drop complete events from the tail
+	// Try to drop complete events first
 	droppedBytes := 0
 	newTail := cb.tail
 
@@ -164,23 +165,24 @@ func (cb *CircularBuffer) makeSpace(needed int) {
 		// Look for next event boundary
 		eventEnd := cb.findNextEventBoundary(newTail)
 		if eventEnd == -1 {
-			// No complete event found, drop everything up to eventMark
-			if cb.eventMark != -1 && cb.eventMark != cb.head {
-				bytesToDrop := cb.distanceBetween(newTail, cb.eventMark)
-				droppedBytes += bytesToDrop
-				newTail = cb.eventMark
-			} else {
-				// No events marked, drop half the buffer
-				bytesToDrop := cb.count / 2
-				droppedBytes += bytesToDrop
-				newTail = (newTail + bytesToDrop) % cb.size
-			}
-		} else {
-			// Drop complete event
-			bytesToDrop := cb.distanceBetween(newTail, eventEnd)
-			droppedBytes += bytesToDrop
-			newTail = eventEnd
+			break // No more complete events
 		}
+
+		// Calculate bytes in this event
+		bytesToDrop := cb.distanceBetween(newTail, eventEnd)
+		droppedBytes += bytesToDrop
+		newTail = eventEnd
+	}
+
+	// If complete events weren't enough, drop precise amount needed
+	if droppedBytes < needed && cb.count > 0 {
+		remainingToDrop := needed - droppedBytes
+		// Don't drop more than what's in the buffer
+		if remainingToDrop > (cb.count - droppedBytes) {
+			remainingToDrop = cb.count - droppedBytes
+		}
+		droppedBytes += remainingToDrop
+		newTail = (newTail + remainingToDrop) % cb.size
 	}
 
 	// Update tail and count

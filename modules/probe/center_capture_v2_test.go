@@ -11,6 +11,11 @@ func TestCaptureEngineV2_BasicCapture(t *testing.T) {
 	// Create test engine with newline delimiter
 	engine := NewCaptureEngineV2(64*1024, []byte("\n")) // 64KB buffers
 
+	// Enable strace for capturing terminal output
+	if err := engine.EnableStrace(); err != nil {
+		t.Skipf("Strace not available: %v", err)
+	}
+
 	// Start a test process that outputs data
 	cmd := exec.Command("bash", "-c", `
 		for i in {1..10}; do
