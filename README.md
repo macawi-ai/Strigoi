@@ -1,19 +1,18 @@
-# Strigoi - Advanced Security Validation Platform
+# Strigoi - Interactive Security Shell
 
 [![CI](https://github.com/macawi-ai/strigoi/actions/workflows/ci.yml/badge.svg)](https://github.com/macawi-ai/strigoi/actions/workflows/ci.yml)
 [![Go Report Card](https://goreportcard.com/badge/github.com/macawi-ai/strigoi)](https://goreportcard.com/report/github.com/macawi-ai/strigoi)
 [![License](https://img.shields.io/badge/License-Proprietary-red.svg)](LICENSE)
 
-Strigoi is an advanced security validation platform that helps security professionals discover and validate attack surfaces in modern architectures, with a special focus on AI/LLM integrations and the Model Context Protocol (MCP).
+Strigoi is an interactive shell/REPL for security reconnaissance. It provides a bash-like interface with directional probe commands for exploring different aspects of target systems.
 
 ## Features
 
-- 🔍 **Interactive REPL**: Bash-like navigation with context-aware commands
-- 🎯 **Smart Discovery**: Probe in cardinal directions for different attack surfaces
-- 📊 **Stream Analysis**: Real-time STDIO monitoring and analysis
-- 🤖 **AI-Aware**: Specialized modules for LLM and MCP security testing
-- 🎨 **Color-Coded Interface**: Visual distinction between directories, commands, and utilities
-- 📝 **Comprehensive Logging**: Detailed audit trails for all operations
+- 🔍 **Interactive REPL**: Bash-like navigation and command execution
+- 🧭 **Directional Probes**: Explore targets from different perspectives (north/south/east/west)
+- 📊 **Stream Monitoring**: Basic STDIO monitoring capabilities
+- 🎨 **Color-Coded Interface**: Visual distinction between directories and commands
+- 🔧 **Extensible**: Command tree structure for adding new probe types
 
 ## Quick Start
 
@@ -27,8 +26,8 @@ cd strigoi
 # Build the binary
 make build
 
-# Or install globally
-make install
+# Or install with the installer script
+./install.sh
 ```
 
 ### Basic Usage
@@ -56,15 +55,15 @@ strigoi> exit
 ```
 strigoi/
 ├── probe/           # Discovery and reconnaissance
-│   ├── north        # API endpoints and external interfaces
-│   ├── south        # Dependencies and supply chain
-│   ├── east         # Data flows and integrations
-│   └── west         # Authentication and access controls
-├── stream/          # STDIO monitoring
-│   ├── tap          # Monitor process STDIO in real-time
-│   ├── record       # Record streams for analysis
-│   └── status       # Show monitoring status
-└── sense/           # (Coming soon) Environmental awareness
+│   ├── north        # Probe north direction (endpoints)
+│   ├── south        # Probe south direction (dependencies)
+│   ├── east         # Probe east direction (data flows)
+│   ├── west         # Probe west direction (integrations)
+│   ├── all          # Probe all directions
+│   └── center       # Central monitoring
+└── stream/          # Stream monitoring
+    ├── tap          # Monitor process STDIO
+    └── status       # Show monitoring status
 ```
 
 ## Development
@@ -129,16 +128,17 @@ strigoi/
 - [API Reference](docs/API.md) - Public API documentation
 - [Security Guide](docs/SECURITY.md) - Security considerations
 
-## Roadmap
+## Current Status
+
+This is an early-stage interactive shell framework. Currently implemented:
 
 - [x] Interactive REPL with navigation
-- [x] Basic probe commands
+- [x] Basic probe command structure (north/south/east/west/all/center)
 - [x] Color-coded interface
-- [ ] Real security module implementation
-- [ ] MCP vulnerability detection
-- [ ] AI/LLM attack surface mapping
-- [ ] Integration with popular security tools
-- [ ] Web UI dashboard
+- [x] Stream monitoring framework
+- [x] Installer script
+
+**Note**: The probe commands currently provide basic framework functionality. Actual security scanning implementations are planned for future releases.
 
 ## Support
 
