@@ -1,18 +1,22 @@
-# Strigoi - Interactive Security Shell
+# Strigoi - AI/LLM Security Assessment CLI
 
 [![CI](https://github.com/macawi-ai/strigoi/actions/workflows/ci.yml/badge.svg)](https://github.com/macawi-ai/strigoi/actions/workflows/ci.yml)
 [![Go Report Card](https://goreportcard.com/badge/github.com/macawi-ai/strigoi)](https://goreportcard.com/report/github.com/macawi-ai/strigoi)
 [![License](https://img.shields.io/badge/License-Proprietary-red.svg)](LICENSE)
 
-Strigoi is an interactive shell/REPL for security reconnaissance. It provides a bash-like interface with directional probe commands for exploring different aspects of target systems.
+Strigoi is an interactive CLI tool designed for security assessment of AI/LLM systems and integrations. It provides an intelligent command interface with directional reconnaissance capabilities specifically tailored for modern AI infrastructure security testing.
 
 ## Features
 
-- 🔍 **Interactive REPL**: Bash-like navigation and command execution
-- 🧭 **Directional Probes**: Explore targets from different perspectives (north/south/east/west)
-- 📊 **Stream Monitoring**: Basic STDIO monitoring capabilities
-- 🎨 **Color-Coded Interface**: Visual distinction between directories and commands
-- 🔧 **Extensible**: Command tree structure for adding new probe types
+- 🤖 **AI-Focused Security**: Specialized for LLM and AI system security assessment
+- 🧭 **Directional Reconnaissance**: Multi-perspective analysis (north/south/east/west)
+  - **North**: API endpoints and external interfaces
+  - **South**: Dependencies and supply chain analysis
+  - **East**: Data flows and AI model integrations
+  - **West**: Authentication and access controls
+- 📊 **Intelligence Gathering**: Real-time monitoring and analysis capabilities
+- 🎨 **Intuitive Interface**: Color-coded CLI with bash-like navigation
+- 🔧 **Extensible Framework**: Modular architecture for custom AI security modules
 
 ## Quick Start
 
@@ -33,16 +37,26 @@ make build
 ### Basic Usage
 
 ```bash
-# Start interactive mode
+# Start interactive AI security assessment
 ./strigoi
 
-# Navigate the command tree
+# Navigate the assessment framework
 strigoi> ls
 strigoi> cd probe
 strigoi/probe> ls
-strigoi/probe> north localhost
 
-# Get help
+# Conduct directional reconnaissance
+strigoi/probe> north api.openai.com     # API security assessment
+strigoi/probe> south requirements.txt   # Dependency analysis
+strigoi/probe> east data_flow.json      # Data integration review
+strigoi/probe> west auth_config.yml     # Access control analysis
+strigoi/probe> all target_system        # Comprehensive assessment
+
+# Monitor AI system interactions
+strigoi> cd stream
+strigoi/stream> tap llm_process_id
+
+# Get contextual help
 strigoi> help
 strigoi> ?
 
@@ -50,20 +64,20 @@ strigoi> ?
 strigoi> exit
 ```
 
-### Command Structure
+### AI Security Assessment Framework
 
 ```
 strigoi/
-├── probe/           # Discovery and reconnaissance
-│   ├── north        # Probe north direction (endpoints)
-│   ├── south        # Probe south direction (dependencies)
-│   ├── east         # Probe east direction (data flows)
-│   ├── west         # Probe west direction (integrations)
-│   ├── all          # Probe all directions
-│   └── center       # Central monitoring
-└── stream/          # Stream monitoring
-    ├── tap          # Monitor process STDIO
-    └── status       # Show monitoring status
+├── probe/                    # AI/LLM Security Assessment
+│   ├── north                # API endpoints & external interfaces
+│   ├── south                # Dependencies & AI model supply chain
+│   ├── east                 # Data flows & model integrations
+│   ├── west                 # Authentication & access controls
+│   ├── all                  # Comprehensive multi-directional scan
+│   └── center               # Central intelligence coordination
+└── stream/                   # AI System Monitoring
+    ├── tap                  # Monitor LLM process interactions
+    └── status               # Real-time assessment status
 ```
 
 ## Development
@@ -128,17 +142,33 @@ strigoi/
 - [API Reference](docs/API.md) - Public API documentation
 - [Security Guide](docs/SECURITY.md) - Security considerations
 
-## Current Status
+## AI Security Focus Areas
 
-This is an early-stage interactive shell framework. Currently implemented:
+Strigoi is specifically designed to address the unique security challenges of AI/LLM systems:
 
-- [x] Interactive REPL with navigation
-- [x] Basic probe command structure (north/south/east/west/all/center)
-- [x] Color-coded interface
-- [x] Stream monitoring framework
-- [x] Installer script
+### 🎯 **Target Environments**
+- LLM API integrations and endpoints
+- AI model deployment pipelines
+- Machine learning inference systems
+- AI-powered application stacks
+- Model Context Protocol (MCP) implementations
 
-**Note**: The probe commands currently provide basic framework functionality. Actual security scanning implementations are planned for future releases.
+### 🔍 **Assessment Capabilities**
+- **API Security**: LLM endpoint vulnerabilities and misconfigurations
+- **Supply Chain**: AI model and dependency integrity analysis
+- **Data Flow**: Training data and inference pipeline security
+- **Access Control**: AI system authentication and authorization
+- **Behavioral Analysis**: Real-time LLM interaction monitoring
+
+### 🚀 **Current Implementation Status**
+- [x] Interactive AI-focused CLI framework
+- [x] Directional probe architecture (north/south/east/west/all/center)
+- [x] Color-coded intelligent interface
+- [x] Stream monitoring for AI processes
+- [x] Extensible module system for AI security tools
+- [x] Professional installer and deployment
+
+**Framework Status**: Production-ready CLI framework with modular architecture for AI security assessment tools. Active development of specialized AI/LLM security modules.
 
 ## Support
 
