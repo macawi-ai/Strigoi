@@ -7,7 +7,7 @@ package-lock.json
 dist/
 build/
 *.exe
-strigoi
+/strigoi
 
 # Test files
 *.test.js
