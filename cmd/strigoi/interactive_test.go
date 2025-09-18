@@ -28,22 +28,8 @@ func TestBuildCommandTree(t *testing.T) {
 		}
 	}
 
-	// Test stream directory exists
-	if stream, ok := tree.Children["stream"]; !ok {
-		t.Error("stream directory not found in command tree")
-	} else {
-		if !stream.IsDirectory {
-			t.Error("stream should be a directory")
-		}
-
-		// Test stream commands
-		expectedCommands := []string{"tap", "record", "status"}
-		for _, cmd := range expectedCommands {
-			if _, ok := stream.Children[cmd]; !ok {
-				t.Errorf("stream command %s not found", cmd)
-			}
-		}
-	}
+	// Note: Stream functionality has been externalized to separate tools
+	// (as documented in buildCommandTree function)
 }
 
 func TestGetPath(t *testing.T) {
