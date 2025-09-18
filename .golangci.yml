@@ -14,9 +14,9 @@ linters:
     - misspell
     - goimports
     - revive    # Re-enabled for cleanup
+    - gosec     # Re-enabled for security cleanup
   disable:
     - errcheck  # Too many violations for now
-    - gosec     # Security issues to address later
     - godot     # Comment period issues
 
 linters-settings:

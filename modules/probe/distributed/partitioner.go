@@ -1,7 +1,7 @@
 package distributed
 
 import (
-	"crypto/md5"
+	"crypto/sha256"
 	"encoding/binary"
 	"fmt"
 	"sort"
@@ -33,7 +33,7 @@ func (p *HashPartitioner) GetNode(key string, nodes []*WorkerNode) string {
 	}
 
 	// Simple hash partitioning
-	hash := md5.Sum([]byte(key))
+	hash := sha256.Sum256([]byte(key))
 	hashInt := binary.BigEndian.Uint64(hash[:8])
 
 	index := hashInt % uint64(len(nodes))
@@ -167,7 +167,7 @@ func (p *ConsistentHashPartitioner) getVirtualKey(nodeID string, index int) stri
 
 // hash generates a 32-bit hash
 func (p *ConsistentHashPartitioner) hash(key string) uint32 {
-	h := md5.Sum([]byte(key))
+	h := sha256.Sum256([]byte(key))
 	return binary.BigEndian.Uint32(h[:4])
 }
 
@@ -241,7 +241,7 @@ func (p *WeightedPartitioner) GetNode(key string, nodes []*WorkerNode) string {
 	}
 
 	// Use key hash to select within weight range
-	hash := md5.Sum([]byte(key))
+	hash := sha256.Sum256([]byte(key))
 	hashInt := binary.BigEndian.Uint64(hash[:8])
 	target := int(hashInt % uint64(totalWeight))
 
