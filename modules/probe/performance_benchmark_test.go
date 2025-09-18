@@ -182,6 +182,8 @@ func Benchmark_ProtocolAwareBuffer(b *testing.B) {
 			// Drain events
 			go func() {
 				for range buffer.ProtocolEvents() {
+					// Discard events to prevent blocking
+					_ = struct{}{} // Consume event
 				}
 			}()
 
@@ -289,6 +291,8 @@ func Benchmark_MemoryAllocation(b *testing.B) {
 			// Drain events
 			go func() {
 				for range buffer.Events() {
+					// Discard events to prevent blocking
+					_ = struct{}{} // Consume event
 				}
 			}()
 

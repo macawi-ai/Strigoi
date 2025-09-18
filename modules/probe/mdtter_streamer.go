@@ -325,7 +325,7 @@ func (e *ElasticEndpoint) Send(events []interface{}) error {
 	}
 
 	// In real implementation, would POST to Elasticsearch
-	log.Printf("Would send %d events to Elasticsearch", len(events))
+	log.Printf("Would send %d events (%d bytes) to Elasticsearch", len(events), len(bulkBody))
 	return nil
 }
 

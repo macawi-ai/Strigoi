@@ -116,7 +116,7 @@ func (s *MemoryScanner) scanMemoryIssues(content, filename string) []SecurityIss
 		// Check for nil pointer dereferences
 		if strings.Contains(line, "if") && strings.Contains(line, "!= nil") {
 			// Good - checking for nil (positive security pattern)
-			// nolint:revive // intentional empty block for positive pattern recognition
+			continue // Skip lines with proper nil checks
 		} else if s.patterns["null_deref"].MatchString(line) &&
 			!strings.Contains(line, ":=") &&
 			!strings.Contains(line, "=") {
@@ -137,6 +137,21 @@ func (s *MemoryScanner) scanMemoryIssues(content, filename string) []SecurityIss
 				})
 			}
 		}
+	}
+
+	// Check for missing defer in file operations
+	if len(deferredCalls) == 0 && strings.Contains(content, "os.Open") {
+		issues = append(issues, SecurityIssue{
+			Type:        "RESOURCE_LEAK",
+			Severity:    "MEDIUM",
+			Title:       "File opened without defer close",
+			Description: "File operations detected but no defer statements found",
+			Location: IssueLocation{
+				File: filename,
+			},
+			CWE:         "CWE-404",
+			Remediation: "Use defer to ensure resources are properly closed",
+		})
 	}
 
 	return issues

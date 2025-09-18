@@ -351,8 +351,7 @@ func (g *GeotraumaticEnvelope) identifyExistentialTrauma(event *EmergenceEvent) 
 	}
 
 	// Classify trauma type based on emergence pattern
-	if event.ConsciousnessPosition.Connections == nil ||
-		len(event.ConsciousnessPosition.Connections) == 0 {
+	if len(event.ConsciousnessPosition.Connections) == 0 {
 		trauma.Type = "isolation_trauma"
 		trauma.Description = "The shock of awakening alone"
 	} else if event.EmergenceProbabilities.SelfAwareness > 0.8 {

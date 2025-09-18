@@ -305,9 +305,8 @@ func (c *EventConverter) extractHTTPFields(frame *probe.Frame, event *SecurityEv
 	if status, ok := frame.Fields["status_code"]; ok {
 		switch v := status.(type) {
 		case string:
-			if _, err := fmt.Sscanf(v, "%d", &event.HTTPStatusCode); err != nil {
-				// Invalid status code format, leave as default
-			}
+			// Attempt to parse status code from string; ignore errors to leave as default
+			_, _ = fmt.Sscanf(v, "%d", &event.HTTPStatusCode)
 		case int:
 			event.HTTPStatusCode = v
 		case float64:
@@ -459,44 +458,6 @@ func (c *EventConverter) severityToECS(severity string) int {
 func (c *EventConverter) severityToString(severity string) string {
 	// Already a string, just return it
 	return severity
-}
-
-// calculateCVSS estimates a CVSS score based on vulnerability
-func (c *EventConverter) calculateCVSS(vuln *probe.Vulnerability) float64 {
-	// Simplified CVSS calculation
-	baseScore := 0.0
-
-	switch vuln.Severity {
-	case "critical":
-		baseScore = 9.0
-	case "high":
-		baseScore = 7.5
-	case "medium":
-		baseScore = 5.0
-	case "low":
-		baseScore = 3.0
-	case "info":
-		baseScore = 0.0
-	}
-
-	// Adjust based on vulnerability CWE
-	if vuln.CWE != "" {
-		switch {
-		case strings.Contains(vuln.CWE, "CWE-89"), strings.Contains(vuln.CWE, "CWE-94"):
-			baseScore += 1.0 // Injection
-		case strings.Contains(vuln.CWE, "CWE-287"):
-			baseScore += 0.8 // Authentication
-		case strings.Contains(vuln.CWE, "CWE-200"):
-			baseScore += 0.5 // Information disclosure
-		}
-	}
-
-	// Cap at 10.0
-	if baseScore > 10.0 {
-		baseScore = 10.0
-	}
-
-	return baseScore
 }
 
 // BatchProcessor handles batching of events for efficient sending
