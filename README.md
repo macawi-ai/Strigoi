@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/macawi-ai/strigoi/actions/workflows/ci.yml/badge.svg)](https://github.com/macawi-ai/strigoi/actions/workflows/ci.yml)
 [![Go Report Card](https://goreportcard.com/badge/github.com/macawi-ai/strigoi)](https://goreportcard.com/report/github.com/macawi-ai/strigoi)
-[![License](https://img.shields.io/badge/License-Proprietary-red.svg)](LICENSE)
+[![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
 
 Strigoi is an interactive CLI tool designed for security assessment of AI/LLM systems and integrations. It provides an intelligent command interface with directional reconnaissance capabilities specifically tailored for modern AI infrastructure security testing.
 
@@ -178,9 +178,13 @@ Strigoi is specifically designed to address the unique security challenges of AI
 
 ## License
 
-Copyright © 2025 Macawi - James R. Saker Jr.
+Copyright © 2025 Macawi LLC. All Rights Reserved.
 
-This is proprietary software. See [LICENSE](LICENSE) for details.
+This work is licensed under the [Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License](http://creativecommons.org/licenses/by-nc-sa/4.0/).
+
+**Attribution Required**: "Strigoi Security Validation Platform by Macawi LLC"
+
+**Commercial Use**: Contact support@macawi.ai for commercial licensing.
 
 ---
 
