@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"sync"
 	"sync/atomic"
@@ -163,7 +164,9 @@ func (ts *TelemetrySystem) handleDetailedMetrics(w http.ResponseWriter, r *http.
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(metrics)
+	if err := json.NewEncoder(w).Encode(metrics); err != nil {
+		http.Error(w, "Failed to encode metrics", http.StatusInternalServerError)
+	}
 }
 
 // handleHealth serves health status
@@ -177,7 +180,9 @@ func (ts *TelemetrySystem) handleHealth(w http.ResponseWriter, r *http.Request) 
 		w.WriteHeader(http.StatusServiceUnavailable)
 	}
 
-	json.NewEncoder(w).Encode(health)
+	if err := json.NewEncoder(w).Encode(health); err != nil {
+		http.Error(w, "Failed to encode health status", http.StatusInternalServerError)
+	}
 }
 
 // handleAlerts serves alert status
@@ -185,7 +190,9 @@ func (ts *TelemetrySystem) handleAlerts(w http.ResponseWriter, r *http.Request) 
 	alerts := ts.alertManager.GetActiveAlerts()
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(alerts)
+	if err := json.NewEncoder(w).Encode(alerts); err != nil {
+		http.Error(w, "Failed to encode alerts", http.StatusInternalServerError)
+	}
 }
 
 // handleGrafanaDashboard serves Grafana dashboard configuration
@@ -949,7 +956,10 @@ func (am *AlertManager) sendWebhook(alert Alert) {
 	data, _ := json.Marshal(payload)
 
 	// Send HTTP POST to webhook URL
-	http.Post(am.webhookURL, "application/json", bytes.NewReader(data))
+	if _, err := http.Post(am.webhookURL, "application/json", bytes.NewReader(data)); err != nil {
+		// Log webhook failure but don't block alert processing
+		log.Printf("Failed to send webhook: %v", err)
+	}
 }
 
 // HealthStatus represents system health

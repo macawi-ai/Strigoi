@@ -51,7 +51,7 @@ func NewAlgedonicChannels(manager *LoopManager) *AlgedonicChannels {
 
 func (a *AlgedonicChannels) registerLoops() {
 	// LOOP-ALG-001: Critical Security Breach
-	a.manager.RegisterLoop(&FeedbackLoop{
+	if err := a.manager.RegisterLoop(&FeedbackLoop{
 		ID:    "LOOP-ALG-001",
 		Name:  "Critical Security Breach",
 		Level: "ALG",
@@ -95,10 +95,12 @@ func (a *AlgedonicChannels) registerLoops() {
 
 			return nil
 		},
-	})
+	}); err != nil {
+		log.Printf("Failed to register LOOP-ALG-001: %v", err)
+	}
 
 	// LOOP-ALG-002: System Failure Cascade
-	a.manager.RegisterLoop(&FeedbackLoop{
+	if err := a.manager.RegisterLoop(&FeedbackLoop{
 		ID:    "LOOP-ALG-002",
 		Name:  "System Failure Cascade",
 		Level: "ALG",
@@ -143,10 +145,12 @@ func (a *AlgedonicChannels) registerLoops() {
 
 			return nil
 		},
-	})
+	}); err != nil {
+		log.Printf("Failed to register LOOP-ALG-002: %v", err)
+	}
 
 	// LOOP-ALG-003: Data Loss Imminent
-	a.manager.RegisterLoop(&FeedbackLoop{
+	if err := a.manager.RegisterLoop(&FeedbackLoop{
 		ID:    "LOOP-ALG-003",
 		Name:  "Data Loss Imminent",
 		Level: "ALG",
@@ -188,10 +192,12 @@ func (a *AlgedonicChannels) registerLoops() {
 
 			return nil
 		},
-	})
+	}); err != nil {
+		log.Printf("Failed to register LOOP-ALG-003: %v", err)
+	}
 
 	// LOOP-ALG-004: Reputation Crisis
-	a.manager.RegisterLoop(&FeedbackLoop{
+	if err := a.manager.RegisterLoop(&FeedbackLoop{
 		ID:    "LOOP-ALG-004",
 		Name:  "Reputation Crisis",
 		Level: "ALG",
@@ -234,7 +240,9 @@ func (a *AlgedonicChannels) registerLoops() {
 
 			return nil
 		},
-	})
+	}); err != nil {
+		log.Printf("Failed to register LOOP-ALG-004: %v", err)
+	}
 }
 
 // startS5Monitor processes algedonic signals at S5 level

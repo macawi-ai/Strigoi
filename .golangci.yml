@@ -16,7 +16,6 @@ linters:
     - revive    # Re-enabled for cleanup
     - gosec     # Re-enabled for security cleanup
   disable:
-    - errcheck  # Too many violations for now
     - godot     # Comment period issues
 
 linters-settings:
@@ -95,3 +94,7 @@ issues:
     - text: "field.*is unused"
       linters:
         - unused
+    # Ignore errcheck in experimental VSM code
+    - path: internal/vsm/
+      linters:
+        - errcheck
