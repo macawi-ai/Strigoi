@@ -18,7 +18,7 @@ import (
 
 var (
 	// Version info.
-	version = "0.5.1-probe-all"
+	version = "0.5.2"
 	build   = "dev"
 
 	// Global verbose flag.
