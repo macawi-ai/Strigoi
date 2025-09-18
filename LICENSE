@@ -1,22 +1,42 @@
-Attribution-NonCommercial-ShareAlike 4.0 International
+GNU AFFERO GENERAL PUBLIC LICENSE
+Version 3, 19 November 2007
 
-This is a human-readable summary of (and not a substitute for) the license.
+Copyright (C) 2025 Macawi LLC. All Rights Reserved.
 
-You are free to:
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as published
+by the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
 
-Share — copy and redistribute the material in any medium or format
-Adapt — remix, transform, and build upon the material
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU Affero General Public License for more details.
 
-The licensor cannot revoke these freedoms as long as you follow the license terms.
+You should have received a copy of the GNU Affero General Public License
+along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-Under the following terms:
+Additional permissions under GNU AGPL version 3 section 7:
 
-Attribution — You must give appropriate credit, provide a link to the license, and indicate if changes were made. You may do so in any reasonable manner, but not in any way that suggests the licensor endorses you or your use.
+If you modify this Program, or any covered work, by linking or combining
+it with proprietary software (or a modified version of that software),
+containing parts not covered by this License, the licensors of this
+Program grant you additional permission to convey the resulting work.
 
-NonCommercial — You may not use the material for commercial purposes.
+COMMERCIAL LICENSING
 
-ShareAlike — If you remix, transform, or build upon the material, you must distribute your contributions under the same license as the original.
+For commercial use that does not comply with the AGPL-3.0 requirements,
+including but not limited to:
+- Distributing this software as part of a proprietary product
+- Using this software in SaaS offerings without open-sourcing your service
+- Incorporating this software into closed-source applications
 
-No additional restrictions — You may not apply legal terms or technological measures that legally restrict others from doing anything the license permits.
+Contact Macawi LLC for commercial licensing:
+- Email: support@macawi.ai
+- Website: https://macawi.ai
 
-No warranties are given. For the full legal code of this license, please see: https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode
+Commercial licenses are available that provide:
+- Rights to use in proprietary software
+- Freedom from AGPL copyleft requirements
+- Technical support and warranties
+- Priority feature development

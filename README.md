@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/macawi-ai/strigoi/actions/workflows/ci.yml/badge.svg)](https://github.com/macawi-ai/strigoi/actions/workflows/ci.yml)
 [![Go Report Card](https://goreportcard.com/badge/github.com/macawi-ai/strigoi)](https://goreportcard.com/report/github.com/macawi-ai/strigoi)
-[![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
+[![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 
 Strigoi is an interactive CLI tool designed for security assessment of AI/LLM systems and integrations. It provides an intelligent command interface with directional reconnaissance capabilities specifically tailored for modern AI infrastructure security testing.
 
@@ -178,28 +178,40 @@ Strigoi is specifically designed to address the unique security challenges of AI
 
 ## License
 
-Copyright © September 2025 Macawi LLC. All Rights Reserved.
+Copyright © 2025 Macawi LLC. All Rights Reserved.
 
-This work is licensed under the [Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License](http://creativecommons.org/licenses/by-nc-sa/4.0/).
+This project is dual-licensed under **AGPL-3.0** with **Commercial Exception**:
 
-### Attribution Requirements
+### Open Source License
 
-When using, redistributing, or referencing this software, you must include:
-"Strigoi Security Validation Platform by Macawi LLC (https://github.com/macawi-ai/Strigoi)"
+This software is licensed under the [GNU Affero General Public License v3.0 (AGPL-3.0)](https://www.gnu.org/licenses/agpl-3.0.html).
+
+**Key AGPL-3.0 Requirements:**
+- ✅ **Freedom to use** — Use for any purpose including commercial
+- ✅ **Freedom to study** — Access to source code guaranteed
+- ✅ **Freedom to modify** — Make changes and improvements
+- ✅ **Freedom to distribute** — Share copies and modifications
+- 🔒 **Copyleft requirement** — Derivative works must be open source
+- 🌐 **Network copyleft** — SaaS use requires offering source code
 
 ### Commercial Licensing
 
-For commercial use, custom licensing, or professional support, contact:
+**Need proprietary use?** Commercial licenses available for:
+- 📦 **Proprietary Products** — Include in closed-source software
+- ☁️ **SaaS Services** — Use without open-sourcing your service
+- 🏢 **Enterprise Solutions** — Custom licensing terms
+- 🛡️ **Support & Warranties** — Professional support included
+
+**Contact for Commercial License:**
 - **Email**: support@macawi.ai
 - **Website**: https://macawi.ai
 
-### License Terms
+### Why AGPL-3.0?
 
-- ✅ **Share** — Copy and redistribute for non-commercial purposes
-- ✅ **Adapt** — Remix, transform, and build upon the material
-- ❌ **No Commercial Use** — Commercial use requires explicit licensing
-- 🔄 **ShareAlike** — Derivatives must use the same license
-- 📝 **Attribution** — Must credit Macawi LLC with proper attribution
+Like MongoDB, Neo4j, and other enterprise open source projects, we use AGPL-3.0 to:
+- Ensure open source contributions benefit everyone
+- Prevent proprietary cloud services from monetizing without contributing back
+- Provide clear commercial licensing path for businesses
 
 ---
 

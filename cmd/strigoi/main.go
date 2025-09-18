@@ -1,6 +1,7 @@
 // Strigoi Security Validation Platform
-// Copyright © September 2025 Macawi LLC. All Rights Reserved.
-// Licensed under CC BY-NC-SA 4.0: https://creativecommons.org/licenses/by-nc-sa/4.0/
+// Copyright © 2025 Macawi LLC. All Rights Reserved.
+// Licensed under AGPL-3.0: https://www.gnu.org/licenses/agpl-3.0.html
+// Commercial licenses available at support@macawi.ai
 
 package main
 
