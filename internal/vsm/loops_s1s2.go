@@ -9,14 +9,14 @@ import (
 // S1S2Loops contains all S1↔S2 anti-oscillation feedback loops
 type S1S2Loops struct {
 	manager *LoopManager
-	
+
 	// Metrics for trigger conditions
-	cpuUsage         atomic.Value // float64
-	memoryUsage      atomic.Value // float64
-	bufferPressure   atomic.Value // float64
-	errorRate        atomic.Value // float64
-	threadCount      atomic.Value // int32
-	queueImbalance   atomic.Value // float64
+	cpuUsage       atomic.Value // float64
+	memoryUsage    atomic.Value // float64
+	bufferPressure atomic.Value // float64
+	errorRate      atomic.Value // float64
+	threadCount    atomic.Value // int32
+	queueImbalance atomic.Value // float64
 }
 
 // NewS1S2Loops creates and registers all S1↔S2 loops
@@ -24,7 +24,7 @@ func NewS1S2Loops(manager *LoopManager) *S1S2Loops {
 	s := &S1S2Loops{
 		manager: manager,
 	}
-	
+
 	// Initialize atomic values
 	s.cpuUsage.Store(0.0)
 	s.memoryUsage.Store(0.0)
@@ -32,7 +32,7 @@ func NewS1S2Loops(manager *LoopManager) *S1S2Loops {
 	s.errorRate.Store(0.0)
 	s.threadCount.Store(int32(runtime.NumGoroutine()))
 	s.queueImbalance.Store(0.0)
-	
+
 	s.registerLoops()
 	return s
 }
@@ -51,12 +51,12 @@ func (s *S1S2Loops) registerLoops() {
 		},
 		Action: func() error {
 			// Rebalance resource allocation
-			runtime.GC() // Force garbage collection
+			runtime.GC()      // Force garbage collection
 			runtime.Gosched() // Yield to scheduler
 			return nil
 		},
 	})
-	
+
 	// LOOP-S1S2-002: Module Coordination Sync
 	s.manager.RegisterLoop(&FeedbackLoop{
 		ID:    "LOOP-S1S2-002",
@@ -75,7 +75,7 @@ func (s *S1S2Loops) registerLoops() {
 			return nil
 		},
 	})
-	
+
 	// LOOP-S1S2-003: Buffer Overflow Prevention
 	s.manager.RegisterLoop(&FeedbackLoop{
 		ID:    "LOOP-S1S2-003",
@@ -93,7 +93,7 @@ func (s *S1S2Loops) registerLoops() {
 			return nil
 		},
 	})
-	
+
 	// LOOP-S1S2-004: Thread Pool Manager
 	s.manager.RegisterLoop(&FeedbackLoop{
 		ID:    "LOOP-S1S2-004",
@@ -115,7 +115,7 @@ func (s *S1S2Loops) registerLoops() {
 			return nil
 		},
 	})
-	
+
 	// LOOP-S1S2-005: Event Queue Balancer
 	s.manager.RegisterLoop(&FeedbackLoop{
 		ID:    "LOOP-S1S2-005",
@@ -131,7 +131,7 @@ func (s *S1S2Loops) registerLoops() {
 			return nil
 		},
 	})
-	
+
 	// LOOP-S1S2-006: Protocol Detection Sync
 	s.manager.RegisterLoop(&FeedbackLoop{
 		ID:    "LOOP-S1S2-006",
@@ -146,7 +146,7 @@ func (s *S1S2Loops) registerLoops() {
 			return nil
 		},
 	})
-	
+
 	// LOOP-S1S2-007: Session State Coherence
 	s.manager.RegisterLoop(&FeedbackLoop{
 		ID:    "LOOP-S1S2-007",
@@ -161,7 +161,7 @@ func (s *S1S2Loops) registerLoops() {
 			return nil
 		},
 	})
-	
+
 	// LOOP-S1S2-008: Module Dependency Resolver
 	s.manager.RegisterLoop(&FeedbackLoop{
 		ID:    "LOOP-S1S2-008",
@@ -176,7 +176,7 @@ func (s *S1S2Loops) registerLoops() {
 			return nil
 		},
 	})
-	
+
 	// LOOP-S1S2-009: Error Rate Dampener
 	s.manager.RegisterLoop(&FeedbackLoop{
 		ID:    "LOOP-S1S2-009",
@@ -194,7 +194,7 @@ func (s *S1S2Loops) registerLoops() {
 			return nil
 		},
 	})
-	
+
 	// LOOP-S1S2-010: Load Distribution Monitor
 	s.manager.RegisterLoop(&FeedbackLoop{
 		ID:    "LOOP-S1S2-010",
@@ -214,7 +214,7 @@ func (s *S1S2Loops) registerLoops() {
 			return nil
 		},
 	})
-	
+
 	// LOOP-S1S2-011: Memory Leak Detector
 	s.manager.RegisterLoop(&FeedbackLoop{
 		ID:    "LOOP-S1S2-011",
@@ -233,7 +233,7 @@ func (s *S1S2Loops) registerLoops() {
 			return nil
 		},
 	})
-	
+
 	// LOOP-S1S2-012: Deadlock Prevention
 	s.manager.RegisterLoop(&FeedbackLoop{
 		ID:    "LOOP-S1S2-012",
@@ -268,23 +268,23 @@ func (s *S1S2Loops) SimulateLoad() {
 	go func() {
 		ticker := time.NewTicker(100 * time.Millisecond)
 		defer ticker.Stop()
-		
+
 		cycle := 0
 		for range ticker.C {
 			cycle++
-			
+
 			// Simulate CPU load
 			cpu := 0.3 + 0.5*float64(cycle%10)/10.0
-			
+
 			// Simulate memory load
 			mem := 0.4 + 0.4*float64(cycle%8)/8.0
-			
+
 			// Simulate buffer pressure
 			buffer := 0.2 + 0.7*float64(cycle%12)/12.0
-			
+
 			// Simulate error rate
 			errors := 0.05 + 0.15*float64(cycle%5)/5.0
-			
+
 			s.UpdateMetrics(cpu, mem, buffer, errors)
 		}
 	}()

@@ -345,10 +345,10 @@ func (m *NorthModule) scanDirectoryForAIConfigs(result *modules.ModuleResult) (*
 					if strings.Contains(strings.ToLower(contentStr), keyword) {
 						relPath, _ := filepath.Rel(targetDir, match)
 						discoveredConfigs = append(discoveredConfigs, map[string]interface{}{
-							"type":     "config_file",
-							"file":     relPath,
-							"keyword":  keyword,
-							"status":   "found",
+							"type":    "config_file",
+							"file":    relPath,
+							"keyword": keyword,
+							"status":  "found",
 						})
 
 						// Extract provider name
@@ -398,10 +398,10 @@ func (m *NorthModule) scanDirectoryForAIConfigs(result *modules.ModuleResult) (*
 				resp.Body.Close()
 				if resp.StatusCode < 500 {
 					discoveredConfigs = append(discoveredConfigs, map[string]interface{}{
-						"type":     "local_service",
-						"service":  service,
-						"port":     port,
-						"status":   "running",
+						"type":    "local_service",
+						"service": service,
+						"port":    port,
+						"status":  "running",
 					})
 					aiServicesFound["local"] = true
 				}

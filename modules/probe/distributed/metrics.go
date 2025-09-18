@@ -48,7 +48,7 @@ func NewCoordinatorMetrics() *CoordinatorMetrics {
 }
 
 // RecordTaskSubmitted records task submission
-func (m *CoordinatorMetrics) RecordTaskSubmitted(taskType TaskType) {
+func (m *CoordinatorMetrics) RecordTaskSubmitted(_ TaskType) {
 	atomic.AddUint64(&m.tasksSubmitted, 1)
 }
 

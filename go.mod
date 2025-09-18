@@ -1,7 +1,8 @@
 module github.com/macawi-ai/strigoi
 
-go 1.21
+go 1.23.0
 
+toolchain go1.24.5
 
 require (
 	github.com/chzyer/readline v1.5.1

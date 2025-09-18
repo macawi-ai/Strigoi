@@ -322,7 +322,7 @@ func (m *SouthModule) analyzeNonPackaged(path string, result *SupplyChainResult)
 
 			// Check for CI/CD configs
 			if info.Name() == ".gitlab-ci.yml" || info.Name() == ".travis.yml" ||
-			   info.Name() == "Jenkinsfile" || strings.HasPrefix(filePath, ".github/workflows/") {
+				info.Name() == "Jenkinsfile" || strings.HasPrefix(filePath, ".github/workflows/") {
 				artifacts = append(artifacts, "CI/CD configuration")
 			}
 		}
