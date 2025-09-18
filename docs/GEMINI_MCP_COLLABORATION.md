@@ -29,7 +29,7 @@ claude mcp list
 
 # Environment verification
 echo $GEMINI_API_KEY
-# Should show: AIzaSyDVUzr2jedg1Y6HTa-NjuRp05VaKkUC_OU
+# Should show: [YOUR_GEMINI_API_KEY]
 ```
 
 ## Available Tools
