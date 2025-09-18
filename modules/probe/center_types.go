@@ -130,20 +130,6 @@ func (b *StreamBuffer) writeData(data []byte) int {
 	return written
 }
 
-// checkEventBoundary checks if current position in data is an event boundary.
-func (b *StreamBuffer) checkEventBoundary(offset int, data []byte) bool {
-	if len(b.eventDelimiter) == 0 || offset+len(b.eventDelimiter) > len(data) {
-		return false
-	}
-
-	for i, delim := range b.eventDelimiter {
-		if data[offset+i] != delim {
-			return false
-		}
-	}
-	return true
-}
-
 // addEventMark records the position of an event boundary.
 func (b *StreamBuffer) addEventMark(position int) {
 	// Remove old marks that are behind readPos
@@ -165,47 +151,8 @@ func (b *StreamBuffer) addEventMark(position int) {
 func (b *StreamBuffer) getAvailableSpace() int {
 	if b.writePos >= b.readPos {
 		return b.size - (b.writePos - b.readPos) - 1
-	} else {
-		return b.readPos - b.writePos - 1
 	}
-}
-
-// makeRoom frees up space by removing old events until we have enough space.
-func (b *StreamBuffer) makeRoom(needed int) {
-	for b.getAvailableSpace() < needed && b.readPos != b.writePos {
-		// Find the next event boundary after readPos
-		nextEvent := b.findNextEventBoundary()
-		if nextEvent != -1 {
-			b.readPos = nextEvent
-			// Clean up old event marks
-			b.cleanupEventMarks()
-		} else {
-			// No event boundaries, just advance readPos
-			b.readPos = (b.readPos + 1) % b.size
-		}
-	}
-}
-
-// findNextEventBoundary finds the next event boundary after readPos.
-func (b *StreamBuffer) findNextEventBoundary() int {
-	if len(b.eventMarks) == 0 {
-		return -1
-	}
-
-	// Find the closest event mark after readPos
-	closestMark := -1
-	for _, mark := range b.eventMarks {
-		if b.isPositionAhead(mark, b.readPos) {
-			if closestMark == -1 || !b.isPositionAhead(mark, closestMark) {
-				closestMark = mark
-			}
-		}
-	}
-
-	if closestMark != -1 {
-		return (closestMark + 1) % b.size
-	}
-	return -1
+	return b.readPos - b.writePos - 1
 }
 
 // removeOldestData removes oldest data to free up at least bytesToRemove space.
@@ -256,9 +203,8 @@ func (b *StreamBuffer) removeOldestData(bytesToRemove int) {
 func (b *StreamBuffer) calculateDistance(from, to int) int {
 	if to >= from {
 		return to - from
-	} else {
-		return b.size - from + to
 	}
+	return b.size - from + to
 }
 
 // cleanupEventMarks removes event marks that are now behind readPos.
@@ -281,9 +227,8 @@ func (b *StreamBuffer) isPositionAhead(pos1, pos2 int) bool {
 	// Calculate distance considering circular nature
 	if pos1 > pos2 {
 		return (pos1 - pos2) <= (b.size / 2)
-	} else {
-		return (pos2 - pos1) > (b.size / 2)
 	}
+	return (pos2 - pos1) > (b.size / 2)
 }
 
 // Read retrieves data from the buffer.
